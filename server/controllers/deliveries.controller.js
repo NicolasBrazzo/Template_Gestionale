@@ -94,6 +94,13 @@ router.post("/", protect, async (req, res) => {
       });
     }
 
+    if (delivery_date && new Date(delivery_date) < new Date(collection_date)) {
+      return res.status(400).json({
+        ok: false,
+        error: "La data di consegna non può essere precedente alla data di raccolta",
+      });
+    }
+
     const existingDelivery = await findDeliveryByDeliveryKey(delivery_key);
     if (existingDelivery) {
       return res.status(409).json({
@@ -126,6 +133,13 @@ router.put("/:id", protect, async (req, res) => {
       return res.status(400).json({
         ok: false,
         error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}`,
+      });
+    }
+
+    if (collection_date && delivery_date && new Date(delivery_date) < new Date(collection_date)) {
+      return res.status(400).json({
+        ok: false,
+        error: "La data di consegna non può essere precedente alla data di raccolta",
       });
     }
 
