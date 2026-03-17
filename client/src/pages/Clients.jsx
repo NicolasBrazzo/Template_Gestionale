@@ -15,7 +15,8 @@ import { Textarea } from "@/components/ui/textarea";
 import Modal from "@/components/Modal";
 import { showSuccess } from "@/utils/toast";
 import { CLIENT_COLUMN_LABELS } from "../constants/columnLabels";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { sortByField } from "../utils/sortHelpers";
 
 const ClientForm = ({ initialData, onSubmit, error }) => {
   const [formState, setFormState] = useState({
@@ -155,13 +156,38 @@ const ClientDetails = ({ client }) => {
   );
 };
 
+const SortIcon = ({ field, sortField, sortDirection }) => {
+  if (sortField !== field) return <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/50" />;
+  return sortDirection === "asc"
+    ? <ChevronUp className="h-3.5 w-3.5 text-foreground" />
+    : <ChevronDown className="h-3.5 w-3.5 text-foreground" />;
+};
+
 export const Clients = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formError, setFormError] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("desc");
   const queryClient = useQueryClient();
+
+  const SORT_CONFIG = {
+    name: { type: "string" },
+    via: { type: "string" },
+    comune: { type: "string" },
+    provincia: { type: "string" },
+  };
+
+  const handleSort = (field) => {
+    if (sortField !== field) {
+      setSortField(field);
+      setSortDirection("desc");
+      return;
+    }
+    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+  };
 
   const handleDelete = async (client) => {
     const clientId = client.id || client._id;
@@ -219,6 +245,11 @@ export const Clients = () => {
 
   const hasClients = clients && clients.length > 0;
 
+  const sortedClients =
+    hasClients && sortField
+      ? sortByField(clients, sortField, sortDirection, SORT_CONFIG)
+      : clients || [];
+
   return (
     <div className="px-6 py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -254,17 +285,45 @@ export const Clients = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   {CLIENT_COLUMN_LABELS.id}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  {CLIENT_COLUMN_LABELS.name}
+                <th
+                  className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide cursor-pointer select-none hover:text-foreground transition-colors"
+                  onClick={() => handleSort("name")}
+                  title="Clicca per ordinare per nome"
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    {CLIENT_COLUMN_LABELS.name}
+                    <SortIcon field="name" sortField={sortField} sortDirection={sortDirection} />
+                  </span>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  {CLIENT_COLUMN_LABELS.via}
+                <th
+                  className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide cursor-pointer select-none hover:text-foreground transition-colors"
+                  onClick={() => handleSort("via")}
+                  title="Clicca per ordinare per via"
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    {CLIENT_COLUMN_LABELS.via}
+                    <SortIcon field="via" sortField={sortField} sortDirection={sortDirection} />
+                  </span>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  {CLIENT_COLUMN_LABELS.comune}
+                <th
+                  className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide cursor-pointer select-none hover:text-foreground transition-colors"
+                  onClick={() => handleSort("comune")}
+                  title="Clicca per ordinare per comune"
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    {CLIENT_COLUMN_LABELS.comune}
+                    <SortIcon field="comune" sortField={sortField} sortDirection={sortDirection} />
+                  </span>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  {CLIENT_COLUMN_LABELS.provincia}
+                <th
+                  className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide cursor-pointer select-none hover:text-foreground transition-colors"
+                  onClick={() => handleSort("provincia")}
+                  title="Clicca per ordinare per provincia"
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    {CLIENT_COLUMN_LABELS.provincia}
+                    <SortIcon field="provincia" sortField={sortField} sortDirection={sortDirection} />
+                  </span>
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   {CLIENT_COLUMN_LABELS.phone}
@@ -281,7 +340,7 @@ export const Clients = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {clients.map((client) => (
+              {sortedClients.map((client) => (
                 <tr
                   key={client.id || client._id}
                   className="hover:bg-muted/30 transition-colors"
