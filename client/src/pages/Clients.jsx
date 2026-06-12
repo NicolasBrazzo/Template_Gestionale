@@ -1,4 +1,3 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import Loader from "../components/Loader";
@@ -17,6 +16,8 @@ import { showSuccess } from "@/utils/toast";
 import { CLIENT_COLUMN_LABELS } from "../constants/columnLabels";
 import { Edit, Trash, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { sortByField } from "../utils/sortHelpers";
+
+import {useFetch} from "../hooks/useFetch";
 
 const ClientForm = ({ initialData, onSubmit, error }) => {
   const [formState, setFormState] = useState({
@@ -171,7 +172,6 @@ export const Clients = () => {
   const [selectedClient, setSelectedClient] = useState(null);
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("desc");
-  const queryClient = useQueryClient();
 
   const SORT_CONFIG = {
     name: { type: "string" },
@@ -202,7 +202,7 @@ export const Clients = () => {
       setFormError(null);
       await deleteClient(clientId);
       showSuccess("Cliente eliminato con successo");
-      await queryClient.invalidateQueries({ queryKey: ["clients"] });
+      await refetch();
     } catch (err) {
       const message =
         err?.response?.data?.error ||
@@ -222,7 +222,7 @@ export const Clients = () => {
         await createClient(formData);
         showSuccess("Cliente creato con successo");
       }
-      await queryClient.invalidateQueries({ queryKey: ["clients"] });
+      await refetch();
       setIsModalOpen(false);
       setEditingItem(null);
     } catch (err) {
@@ -238,10 +238,8 @@ export const Clients = () => {
     data: clients,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["clients"],
-    queryFn: () => fetchClients(),
-  });
+    refetch,
+  } = useFetch(() => fetchClients(), []);
 
   const hasClients = clients && clients.length > 0;
 

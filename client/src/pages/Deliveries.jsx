@@ -1,4 +1,3 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import Loader from "../components/Loader";
@@ -18,6 +17,7 @@ import { fetchClients } from "../services/clientsService";
 import { showSuccess } from "@/utils/toast";
 import { DELIVERY_COLUMN_LABELS } from "../constants/columnLabels";
 import { Edit, Trash } from "lucide-react";
+import { useFetch } from "../hooks/useFetch";
 
 const STATUS_CONFIG = {
   da_ritirare: { label: "Da ritirare", variant: "warning" },
@@ -41,10 +41,7 @@ const DeliveryForm = ({ initialData, onSubmit, error }) => {
     status: initialData?.status || "",
   });
 
-  const { data: clients } = useQuery({
-    queryKey: ["clients"],
-    queryFn: () => fetchClients(),
-  });
+  const { data: clients } = useFetch(() => fetchClients(), []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -158,12 +155,8 @@ export const Deliveries = () => {
   const [formError, setFormError] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
-  const queryClient = useQueryClient();
 
-  const { data: clients } = useQuery({
-    queryKey: ["clients"],
-    queryFn: () => fetchClients(),
-  });
+  const { data: clients } = useFetch(() => fetchClients(), []);
 
   const handleDelete = async (delivery) => {
     const deliveryId = delivery.id || delivery._id;
@@ -178,7 +171,7 @@ export const Deliveries = () => {
       setFormError(null);
       await deleteDelivery(deliveryId);
       showSuccess("Consegna eliminata con successo");
-      await queryClient.invalidateQueries({ queryKey: ["deliveries"] });
+      await refetch();
     } catch (err) {
       const message =
         err?.response?.data?.error ||
@@ -198,7 +191,7 @@ export const Deliveries = () => {
         await createDelivery(formData);
         showSuccess("Consegna creata con successo");
       }
-      await queryClient.invalidateQueries({ queryKey: ["deliveries"] });
+      await refetch();
       setIsModalOpen(false);
       setEditingItem(null);
     } catch (err) {
@@ -214,14 +207,15 @@ export const Deliveries = () => {
     data: deliveries,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["deliveries", { status: statusFilter, id_client: clientFilter }],
-    queryFn: () =>
+    refetch,
+  } = useFetch(
+    () =>
       fetchDeliveries({
         status: statusFilter || undefined,
         id_client: clientFilter || undefined,
       }),
-  });
+    [statusFilter, clientFilter],
+  );
 
   const hasDeliveries = deliveries && deliveries.length > 0;
 
