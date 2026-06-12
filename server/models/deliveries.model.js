@@ -1,8 +1,10 @@
 const supabase = require("../config/db_connection");
 
+const TABLE_NAME = "ECE_Deliveries";
+
 // Find All Deliveries (with optional filters)
 const findAllDeliveries = async (filters = {}) => {
-  let query = supabase.from("ECE_Deliveries").select("*");
+  let query = supabase.from(TABLE_NAME).select("*");
 
   if (filters.status) {
     query = query.eq("status", filters.status);
@@ -23,7 +25,7 @@ const findAllDeliveries = async (filters = {}) => {
 // Find Delivery by ID
 const findDeliveryById = async (id) => {
   const { data, error } = await supabase
-    .from("ECE_Deliveries")
+    .from(TABLE_NAME)
     .select("*")
     .eq("id", id)
     .maybeSingle();
@@ -44,7 +46,7 @@ const createDelivery = async (
   status
 ) => {
   const { data, error } = await supabase
-    .from("ECE_Deliveries")
+    .from(TABLE_NAME)
     .insert([
       {
         client_id,
@@ -67,7 +69,7 @@ const createDelivery = async (
 // Update Delivery by ID
 const updateDeliveryById = async (id, deliveriesData) => {
   const { data, error } = await supabase
-    .from("ECE_Deliveries")
+    .from(TABLE_NAME)
     .update(deliveriesData)
     .eq("id", id)
     .select()
@@ -81,7 +83,7 @@ const updateDeliveryById = async (id, deliveriesData) => {
 // Delete Delivery by ID
 const deleteDeliveryById = async (id) => {
   const { data, error } = await supabase
-    .from("ECE_Deliveries")
+    .from(TABLE_NAME)
     .delete()
     .eq("id", id)
     .select()
@@ -97,7 +99,7 @@ const deleteDeliveryById = async (id) => {
 // Find Delivery by Delivery Key
 const findDeliveryByDeliveryKey = async (delivery_key) => {
   const { data, error } = await supabase
-    .from("ECE_Deliveries")
+    .from(TABLE_NAME)
     .select("*")
     .eq("delivery_key", delivery_key)
     .maybeSingle();
@@ -115,7 +117,7 @@ const findDeliveryByDeliveryKeyAndCollectionDate = async (
   collection_date,
 ) => {
   const { data, error } = await supabase
-    .from("ECE_Deliveries")
+    .from(TABLE_NAME)
     .select("*")
     .eq("delivery_key", delivery_key)
     .eq("collection_date", collection_date)

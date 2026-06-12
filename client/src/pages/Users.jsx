@@ -1,4 +1,3 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import Loader from "../components/Loader";
@@ -15,8 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import Modal from "@/components/Modal";
 import { showSuccess } from "../utils/toast";
 import { USERS_COLUMN_LABELS } from "../constants/columnLabels";
-import { Edit, Trash, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
-import { sortByField } from "../utils/sortHelpers";
+import { useFetch } from "../hooks/useFetch";
+import { DataTable } from "../components/DataTable";
 
 const UsersForm = ({ initialData, onSubmit, error }) => {
   const [formState, setFormState] = useState({
@@ -91,36 +90,41 @@ const UsersForm = ({ initialData, onSubmit, error }) => {
   );
 };
 
-const SortIcon = ({ field, sortField, sortDirection }) => {
-  if (sortField !== field) return <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/50" />;
-  return sortDirection === "asc"
-    ? <ChevronUp className="h-3.5 w-3.5 text-foreground" />
-    : <ChevronDown className="h-3.5 w-3.5 text-foreground" />;
-};
+const COLUMNS = [
+  {
+    key: "id",
+    label: USERS_COLUMN_LABELS.id,
+  },
+  {
+    key: "email",
+    label: USERS_COLUMN_LABELS.email,
+    sortable: true,
+  },
+  {
+    key: "isAdmin",
+    label: USERS_COLUMN_LABELS.isAdmin,
+    sortable: true,
+    sortType: "boolean",
+    render: (user) =>
+      user.isAdmin ? (
+        <Badge variant="indigo">Admin</Badge>
+      ) : (
+        <Badge variant="muted">Utente</Badge>
+      ),
+  },
+];
 
 export const Users = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [formError, setFormError] = useState(null);
 
-  const [sortField, setSortField] = useState(null);
-  const [sortDirection, setSortDirection] = useState("desc");
-
-  const queryClient = useQueryClient();
-
-  const SORT_CONFIG = {
-    isAdmin: { type: "boolean" },
-    email: { type: "string" },
-  };
-
-  const handleSort = (field) => {
-    if (sortField !== field) {
-      setSortField(field);
-      setSortDirection("desc");
-      return;
-    }
-    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-  };
+  const {
+    data: users,
+    isLoading,
+    error,
+    refetch,
+  } = useFetch(() => fetchUsers(), []);
 
   const handleDelete = async (user) => {
     const userId = user.id || user._id;
@@ -135,7 +139,7 @@ export const Users = () => {
       setFormError(null);
       await deleteUser(userId);
       showSuccess("Utente eliminato con successo");
-      await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await refetch();
     } catch (err) {
       const message =
         err?.response?.data?.error ||
@@ -155,7 +159,7 @@ export const Users = () => {
         await createUser(formData);
         showSuccess("Utente creato con successo");
       }
-      await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await refetch();
       setIsModalOpen(false);
       setEditingItem(null);
     } catch (err) {
@@ -167,21 +171,7 @@ export const Users = () => {
     }
   };
 
-  const {
-    data: users,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => fetchUsers(),
-  });
-
   const hasUsers = users && users.length > 0;
-
-  const sortedUsers =
-    hasUsers && sortField
-      ? sortByField(users, sortField, sortDirection, SORT_CONFIG)
-      : users || [];
 
   return (
     <div className="px-6 py-6 space-y-6">
@@ -211,80 +201,18 @@ export const Users = () => {
       )}
 
       {hasUsers && (
-        <div className="rounded-lg border bg-card overflow-x-auto shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  {USERS_COLUMN_LABELS.id}
-                </th>
-                <th
-                  className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide cursor-pointer select-none hover:text-foreground transition-colors"
-                  onClick={() => handleSort("email")}
-                  title="Clicca per ordinare per email"
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    {USERS_COLUMN_LABELS.email}
-                    <SortIcon field="email" sortField={sortField} sortDirection={sortDirection} />
-                  </span>
-                </th>
-                <th
-                  className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide cursor-pointer select-none hover:text-foreground transition-colors"
-                  onClick={() => handleSort("isAdmin")}
-                  title="Clicca per ordinare per tipo utente"
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    {USERS_COLUMN_LABELS.isAdmin}
-                    <SortIcon field="isAdmin" sortField={sortField} sortDirection={sortDirection} />
-                  </span>
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Azioni
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {sortedUsers.map((user) => (
-                <tr
-                  key={user.id || user._id}
-                  className="hover:bg-muted/30 transition-colors"
-                >
-                  <td className="px-4 py-3 text-muted-foreground">{user.id}</td>
-                  <td className="px-4 py-3 font-medium">{user.email}</td>
-                  <td className="px-4 py-3">
-                    {user.isAdmin ? (
-                      <Badge variant="indigo">Admin</Badge>
-                    ) : (
-                      <Badge variant="muted">Utente</Badge>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => {
-                          setEditingItem(user);
-                          setFormError(null);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <Edit />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon-sm"
-                        onClick={() => handleDelete(user)}
-                      >
-                        <Trash />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={COLUMNS}
+          data={users}
+          actions={{
+            onEdit: (user) => {
+              setEditingItem(user);
+              setFormError(null);
+              setIsModalOpen(true);
+            },
+            onDelete: handleDelete,
+          }}
+        />
       )}
 
       {!isLoading && !error && !hasUsers && (

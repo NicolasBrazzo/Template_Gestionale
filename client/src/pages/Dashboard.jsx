@@ -1,5 +1,4 @@
 import { useAuth } from "../context/AuthContext";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Truck, Users, UserCog, MapPin, ArrowRight } from "lucide-react";
 
@@ -7,6 +6,7 @@ import { fetchClients } from "../services/clientsService";
 import { fetchDeliveries } from "../services/deliveriesService";
 import { fetchUsers } from "../services/userService";
 import { Button } from "@/components/ui/button";
+import { useFetch } from "../hooks/useFetch";
 
 export const Dashboard = () => {
   const { user, loading, logout } = useAuth();
@@ -16,29 +16,24 @@ export const Dashboard = () => {
     data: clients,
     isLoading: loadingClients,
     error: clientsError,
-  } = useQuery({
-    queryKey: ["clients"],
-    queryFn: () => fetchClients(),
-  });
+  } = useFetch(() => fetchClients(), []);
 
   const {
     data: deliveries,
     isLoading: loadingDeliveries,
     error: deliveriesError,
-  } = useQuery({
-    queryKey: ["deliveries", { status: "", id_client: "" }],
-    queryFn: () => fetchDeliveries(),
-  });
+  } = useFetch(() => fetchDeliveries(), []);
 
+  // Le anagrafiche utenti servono solo agli admin: se non lo è,
+  // restituiamo una lista vuota senza chiamare il server (sostituisce "enabled").
   const {
     data: users,
     isLoading: loadingUsers,
     error: usersError,
-  } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => fetchUsers(),
-    enabled: !!user?.isAdmin,
-  });
+  } = useFetch(
+    () => (user?.isAdmin ? fetchUsers() : Promise.resolve([])),
+    [user?.isAdmin],
+  );
 
   if (loading) return <p>loading...</p>;
   if (!user) return <p>Accesso negato</p>;

@@ -1,32 +1,6 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
 
-/**
- * import Modal from "./components/Modal";
-
-  // Nel parent:
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-
-  const handleSubmit = async (formData) => {
-    if (editingItem) {
-      await api.put(`/risorse/${editingItem.id}`, formData);
-    } else {
-      await api.post("/risorse", formData);
-    }
-    setIsModalOpen(false);
-    setEditingItem(null);
-  };
-
-  <Modal
-    isOpen={isModalOpen}
-    onClose={() => { setIsModalOpen(false); setEditingItem(null); }}
-    title={editingItem ? "Modifica" : "Nuovo"}
-  >
-    <Form initialData={editingItem} onSubmit={handleSubmit} />
-  </Modal>
- */
-
 const Modal = ({ isOpen, onClose, title, children }) => {
   useEffect(() => {
     if (isOpen) {

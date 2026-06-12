@@ -13,6 +13,7 @@ const {
 
 const router = express.Router();
 
+// Login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -67,6 +68,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Get current user
 router.get("/me", protect, (req, res) => {
   return res.json({
     ok: true,
@@ -74,6 +76,7 @@ router.get("/me", protect, (req, res) => {
   });
 });
 
+// Logut
 router.post("/logout", (req, res) => {
   return res.json({ ok: true });
 });

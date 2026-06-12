@@ -1,5 +1,6 @@
 import axios from "axios";
 
+// creazione involucro axios con configurazione di base
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
@@ -21,6 +22,7 @@ api.interceptors.request.use(
   }
 );
 
+// Interceptor per gestire gli errori in modo centralizzato
 api.interceptors.response.use(
   response => response,
   error => {
@@ -31,7 +33,7 @@ api.interceptors.response.use(
 
     // Errore di rete (server non raggiungibile, CORS, timeout)
     if (!error.response) {
-      console.error('❌ Errore di rete:', {
+      console.error('Errore di rete:', {
         message: error.message,
         code: error.code,
         url: error.config?.url

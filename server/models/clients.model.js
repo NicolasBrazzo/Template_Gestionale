@@ -1,8 +1,10 @@
 const supabase = require("../config/db_connection");
 
+const TABLE_NAME = "ECE_Clients";
+
 // Find All Clients
 const findAllClients = async () => {
-  const { data, error } = await supabase.from("ECE_Clients").select("*");
+  const { data, error } = await supabase.from(TABLE_NAME).select("*");
 
   if (error) {
     throw new Error("DATABASE_FIND_ALL_CLIENTS_ERROR");
@@ -13,7 +15,7 @@ const findAllClients = async () => {
 // Find Client by Email
 const findClientByEmail = async (email) => {
   const { data, error } = await supabase
-    .from("ECE_Clients")
+    .from(TABLE_NAME)
     .select("*")
     .eq("email", email)
     .maybeSingle();
@@ -27,7 +29,7 @@ const findClientByEmail = async (email) => {
 // Find Client by ID
 const findClientById = async (id) => {
   const { data, error } = await supabase
-    .from("ECE_Clients")
+    .from(TABLE_NAME)
     .select("*")
     .eq("id", id)
     .maybeSingle();
@@ -50,7 +52,7 @@ const createClient = async (
   note,
 ) => {
   const { data, error } = await supabase
-    .from("ECE_Clients")
+    .from(TABLE_NAME)
     .insert([
       {
         name,
@@ -75,7 +77,7 @@ const createClient = async (
 // Update Client by ID
 const updateClientById = async (id, clientsData) => {
   const { data, error } = await supabase
-    .from("ECE_Clients")
+    .from(TABLE_NAME)
     .update(clientsData)
     .eq("id", id)
     .select()
@@ -89,7 +91,7 @@ const updateClientById = async (id, clientsData) => {
 // Delete Client by ID
 const deleteClientById = async (id) => {
   const { data, error } = await supabase
-    .from("ECE_Clients")
+    .from(TABLE_NAME)
     .delete()
     .eq("id", id)
     .select()
