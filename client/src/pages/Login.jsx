@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useMutation } from "../hooks/useMutation";
 import { showSuccess } from "../utils/toast";
 import Loader from "../components/Loader";
 import { Input } from "@/components/ui/input";
@@ -10,26 +11,34 @@ import { Button } from "@/components/ui/button";
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const {
+    mutate: doLogin,
+    isLoading: loading,
+    error,
+  } = useMutation(
+    async (credentials) => {
+      const res = await login(credentials);
+      if (!res.ok) throw new Error(res.message);
+      return res;
+    },
+    {
+      onSuccess: () => {
+        showSuccess("Login avvenuto con successo");
+        navigate("/dashboard");
+      },
+    }
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    const res = await login({ email: email, password: password });
-    if (res.ok) {
-      showSuccess("Login avvenuto con successo");
-      setLoading(false);
-      navigate("/dashboard");
-    } else {
-      setLoading(false);
-      setError(res.message);
-      console.error("Login error");
+    try {
+      await doLogin({ email, password });
+    } catch {
+      // errore già gestito dall'hook (stato `error`)
     }
   };
 

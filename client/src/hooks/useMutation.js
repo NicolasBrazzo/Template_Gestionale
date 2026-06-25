@@ -1,33 +1,12 @@
 import { useState, useCallback } from "react";
 
 /**
- * useMutation — sostituto "fatto a mano" di useMutation di TanStack.
- *
  * Per le SCRITTURE (POST / PUT / DELETE). Gestisce loading ed errore
  * della singola operazione, così nelle pagine non ripeti ogni volta
  * try/catch + stato di caricamento.
  *
  * A differenza di useFetch NON parte da solo: lo lanci tu quando serve
  * (es. nel submit di un form o nell'onClick di un bottone).
- *
- * @param {Function} mutationFn  Funzione async che esegue la scrittura.
- *                               Riceve gli argomenti che passi a mutate().
- *                               Es: (payload) => createClient(payload)
- * @param {Object}   [options]
- *   - onSuccess(result): callback chiamata se la scrittura riesce
- *   - onError(message):  callback chiamata se la scrittura fallisce
- *
- * @returns {{ mutate, isLoading, error }}
- *   - mutate(...args): lancia la mutazione. Ritorna i dati in caso di successo,
- *                      altrimenti rilancia l'errore (così puoi anche usare try/catch).
- *   - isLoading:       true mentre la scrittura è in corso
- *   - error:           messaggio d'errore (null se tutto ok)
- *
- * Esempio:
- *   const { mutate: removeClient, isLoading } = useMutation(deleteClient, {
- *     onSuccess: () => { showSuccess("Eliminato"); refetch(); },
- *   });
- *   // poi: await removeClient(clientId);
  */
 export function useMutation(mutationFn, options = {}) {
   const { onSuccess, onError } = options;
@@ -56,5 +35,8 @@ export function useMutation(mutationFn, options = {}) {
     [mutationFn]
   );
 
-  return { mutate, isLoading, error };
+  // utile per ripulire l'errore (es. alla riapertura di un form/modale)
+  const reset = useCallback(() => setError(null), []);
+
+  return { mutate, isLoading, error, reset };
 }

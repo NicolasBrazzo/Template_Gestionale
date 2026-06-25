@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useMutation } from "../hooks/useMutation";
 import { showSuccess } from "../utils/toast";
 import Loader from "../components/Loader";
 import { Input } from "@/components/ui/input";
@@ -16,48 +17,65 @@ export const Register = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [validationError, setValidationError] = useState(null);
 
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  const {
+    mutate: doRegister,
+    isLoading: loading,
+    error: submitError,
+  } = useMutation(
+    async (payload) => {
+      const res = await register(payload);
+      if (!res.ok) throw new Error(res.message);
+      return res;
+    },
+    {
+      onSuccess: () => {
+        showSuccess("Registrazione avvenuta con successo");
+        navigate("/dashboard");
+      },
+    }
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setValidationError(null);
 
     const trimmedName = name.trim();
     const trimmedSurname = surname.trim();
     const nameRegex = /^[A-Za-zÀ-ÿ' -]+$/;
 
     if (trimmedName.length < 2) {
-      setError("Il nome deve contenere almeno 2 caratteri");
+      setValidationError("Il nome deve contenere almeno 2 caratteri");
       return;
     }
     if (!nameRegex.test(trimmedName)) {
-      setError("Il nome può contenere solo lettere, spazi, apostrofi e trattini");
+      setValidationError("Il nome può contenere solo lettere, spazi, apostrofi e trattini");
       return;
     }
     if (trimmedSurname.length < 2) {
-      setError("Il cognome deve contenere almeno 2 caratteri");
+      setValidationError("Il cognome deve contenere almeno 2 caratteri");
       return;
     }
     if (!nameRegex.test(trimmedSurname)) {
-      setError("Il cognome può contenere solo lettere, spazi, apostrofi e trattini");
+      setValidationError("Il cognome può contenere solo lettere, spazi, apostrofi e trattini");
       return;
     }
 
-    setLoading(true);
-
-    const res = await register({ email: email, password: password, repeatPassword: confirmPassword, isAdmin: isAdmin, name: trimmedName, surname: trimmedSurname });
-    if (res.ok) {
-      showSuccess("Registrazione avvenuta con successo");
-      setLoading(false);
-      navigate("/dashboard");
-    } else {
-      setLoading(false);
-      setError(res.message);
-      console.error("Registration error");
+    try {
+      await doRegister({
+        email,
+        password,
+        repeatPassword: confirmPassword,
+        isAdmin,
+        name: trimmedName,
+        surname: trimmedSurname,
+      });
+    } catch {
+      // errore già gestito dall'hook (stato `submitError`)
     }
   };
 
@@ -162,8 +180,10 @@ export const Register = () => {
               <Label htmlFor="isAdmin">Amministratore</Label>
             </div>
 
-            {error && (
-              <p className="text-sm text-destructive font-medium">{error}</p>
+            {(validationError || submitError) && (
+              <p className="text-sm text-destructive font-medium">
+                {validationError || submitError}
+              </p>
             )}
 
             <Button type="submit" className="w-full">

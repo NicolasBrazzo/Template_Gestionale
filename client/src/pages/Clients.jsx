@@ -18,6 +18,7 @@ import { Edit, Trash, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-reac
 import { sortByField } from "../utils/sortHelpers";
 
 import {useFetch} from "../hooks/useFetch";
+import { useMutation } from "../hooks/useMutation";
 
 const ClientForm = ({ initialData, onSubmit, error }) => {
   const [formState, setFormState] = useState({
@@ -167,7 +168,6 @@ const SortIcon = ({ field, sortField, sortDirection }) => {
 export const Clients = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [formError, setFormError] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
   const [sortField, setSortField] = useState(null);
@@ -189,6 +189,37 @@ export const Clients = () => {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
+  const {
+    mutate: saveClient,
+    error: saveError,
+    reset: resetSaveError,
+  } = useMutation(
+    (formData) =>
+      editingItem ? updateClient(editingItem.id, formData) : createClient(formData),
+    {
+      onSuccess: () => {
+        showSuccess(
+          editingItem
+            ? "Cliente aggiornato con successo"
+            : "Cliente creato con successo",
+        );
+        refetch();
+        setIsModalOpen(false);
+        setEditingItem(null);
+      },
+    },
+  );
+
+  const { mutate: removeClient } = useMutation(
+    (clientId) => deleteClient(clientId),
+    {
+      onSuccess: () => {
+        showSuccess("Cliente eliminato con successo");
+        refetch();
+      },
+    },
+  );
+
   const handleDelete = async (client) => {
     const clientId = client.id || client._id;
     if (!clientId) return;
@@ -199,38 +230,17 @@ export const Clients = () => {
     if (!confirmDelete) return;
 
     try {
-      setFormError(null);
-      await deleteClient(clientId);
-      showSuccess("Cliente eliminato con successo");
-      await refetch();
-    } catch (err) {
-      const message =
-        err?.response?.data?.error ||
-        err?.message ||
-        "Si è verificato un errore durante l'eliminazione";
-      setFormError(message);
+      await removeClient(clientId);
+    } catch {
+      // errore già mostrato come toast dal service
     }
   };
 
   const handleSubmit = async (formData) => {
     try {
-      setFormError(null);
-      if (editingItem) {
-        await updateClient(editingItem.id, formData);
-        showSuccess("Cliente aggiornato con successo");
-      } else {
-        await createClient(formData);
-        showSuccess("Cliente creato con successo");
-      }
-      await refetch();
-      setIsModalOpen(false);
-      setEditingItem(null);
-    } catch (err) {
-      const message =
-        err?.response?.data?.error ||
-        err?.message ||
-        "Si è verificato un errore imprevisto";
-      setFormError(message);
+      await saveClient(formData);
+    } catch {
+      // errore gestito dall'hook (stato `saveError`)
     }
   };
 
@@ -260,7 +270,7 @@ export const Clients = () => {
         <Button
           onClick={() => {
             setEditingItem(null);
-            setFormError(null);
+            resetSaveError();
             setIsModalOpen(true);
           }}
         >
@@ -366,7 +376,7 @@ export const Clients = () => {
                         size="icon-sm"
                         onClick={() => {
                           setEditingItem(client);
-                          setFormError(null);
+                          resetSaveError();
                           setIsModalOpen(true);
                         }}
                       >
@@ -399,14 +409,14 @@ export const Clients = () => {
         onClose={() => {
           setIsModalOpen(false);
           setEditingItem(null);
-          setFormError(null);
+          resetSaveError();
         }}
         title={editingItem ? "Modifica cliente" : "Nuovo cliente"}
       >
         <ClientForm
           initialData={editingItem}
           onSubmit={handleSubmit}
-          error={formError}
+          error={saveError}
         />
       </Modal>
       <Modal

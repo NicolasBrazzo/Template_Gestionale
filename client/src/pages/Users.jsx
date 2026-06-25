@@ -15,6 +15,7 @@ import Modal from "@/components/Modal";
 import { showSuccess } from "../utils/toast";
 import { USERS_COLUMN_LABELS } from "../constants/columnLabels";
 import { useFetch } from "../hooks/useFetch";
+import { useMutation } from "../hooks/useMutation";
 import { DataTable } from "../components/DataTable";
 
 const UsersForm = ({ initialData, onSubmit, error }) => {
@@ -117,7 +118,6 @@ const COLUMNS = [
 export const Users = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [formError, setFormError] = useState(null);
 
   const {
     data: users,
@@ -125,6 +125,37 @@ export const Users = () => {
     error,
     refetch,
   } = useFetch(() => fetchUsers(), []);
+
+  const {
+    mutate: saveUser,
+    error: saveError,
+    reset: resetSaveError,
+  } = useMutation(
+    (formData) =>
+      editingItem ? updateUser(editingItem.id, formData) : createUser(formData),
+    {
+      onSuccess: () => {
+        showSuccess(
+          editingItem
+            ? "Utente aggiornato con successo"
+            : "Utente creato con successo",
+        );
+        refetch();
+        setIsModalOpen(false);
+        setEditingItem(null);
+      },
+    },
+  );
+
+  const { mutate: removeUser } = useMutation(
+    (userId) => deleteUser(userId),
+    {
+      onSuccess: () => {
+        showSuccess("Utente eliminato con successo");
+        refetch();
+      },
+    },
+  );
 
   const handleDelete = async (user) => {
     const userId = user.id || user._id;
@@ -136,38 +167,17 @@ export const Users = () => {
     if (!confirmDelete) return;
 
     try {
-      setFormError(null);
-      await deleteUser(userId);
-      showSuccess("Utente eliminato con successo");
-      await refetch();
-    } catch (err) {
-      const message =
-        err?.response?.data?.error ||
-        err?.message ||
-        "Si è verificato un errore durante l'eliminazione";
-      setFormError(message);
+      await removeUser(userId);
+    } catch {
+      // errore gestito dall'hook
     }
   };
 
   const handleSubmit = async (formData) => {
     try {
-      setFormError(null);
-      if (editingItem) {
-        await updateUser(editingItem.id, formData);
-        showSuccess("Utente aggiornato con successo");
-      } else {
-        await createUser(formData);
-        showSuccess("Utente creato con successo");
-      }
-      await refetch();
-      setIsModalOpen(false);
-      setEditingItem(null);
-    } catch (err) {
-      const message =
-        err?.response?.data?.error ||
-        err?.message ||
-        "Si è verificato un errore imprevisto";
-      setFormError(message);
+      await saveUser(formData);
+    } catch {
+      // errore gestito dall'hook (stato `saveError`)
     }
   };
 
@@ -185,7 +195,7 @@ export const Users = () => {
         <Button
           onClick={() => {
             setEditingItem(null);
-            setFormError(null);
+            resetSaveError();
             setIsModalOpen(true);
           }}
         >
@@ -207,7 +217,7 @@ export const Users = () => {
           actions={{
             onEdit: (user) => {
               setEditingItem(user);
-              setFormError(null);
+              resetSaveError();
               setIsModalOpen(true);
             },
             onDelete: handleDelete,
@@ -226,14 +236,14 @@ export const Users = () => {
         onClose={() => {
           setIsModalOpen(false);
           setEditingItem(null);
-          setFormError(null);
+          resetSaveError();
         }}
         title={editingItem ? "Modifica utente" : "Nuovo utente"}
       >
         <UsersForm
           initialData={editingItem}
           onSubmit={handleSubmit}
-          error={formError}
+          error={saveError}
         />
       </Modal>
     </div>

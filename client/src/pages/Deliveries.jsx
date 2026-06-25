@@ -18,6 +18,7 @@ import { showSuccess } from "@/utils/toast";
 import { DELIVERY_COLUMN_LABELS } from "../constants/columnLabels";
 import { Edit, Trash } from "lucide-react";
 import { useFetch } from "../hooks/useFetch";
+import { useMutation } from "../hooks/useMutation";
 
 const STATUS_CONFIG = {
   da_ritirare: { label: "Da ritirare", variant: "warning" },
@@ -152,11 +153,43 @@ export const Deliveries = () => {
   const [clientFilter, setClientFilter] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [formError, setFormError] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedDelivery, setSelectedDelivery] = useState(null);
 
   const { data: clients } = useFetch(() => fetchClients(), []);
+
+  const {
+    mutate: saveDelivery,
+    error: saveError,
+    reset: resetSaveError,
+  } = useMutation(
+    (formData) =>
+      editingItem
+        ? updateDelivery(editingItem.id, formData)
+        : createDelivery(formData),
+    {
+      onSuccess: () => {
+        showSuccess(
+          editingItem
+            ? "Consegna aggiornata con successo"
+            : "Consegna creata con successo",
+        );
+        refetch();
+        setIsModalOpen(false);
+        setEditingItem(null);
+      },
+    },
+  );
+
+  const { mutate: removeDelivery } = useMutation(
+    (deliveryId) => deleteDelivery(deliveryId),
+    {
+      onSuccess: () => {
+        showSuccess("Consegna eliminata con successo");
+        refetch();
+      },
+    },
+  );
 
   const handleDelete = async (delivery) => {
     const deliveryId = delivery.id || delivery._id;
@@ -168,38 +201,17 @@ export const Deliveries = () => {
     if (!confirmDelete) return;
 
     try {
-      setFormError(null);
-      await deleteDelivery(deliveryId);
-      showSuccess("Consegna eliminata con successo");
-      await refetch();
-    } catch (err) {
-      const message =
-        err?.response?.data?.error ||
-        err?.message ||
-        "Si è verificato un errore durante l'eliminazione";
-      setFormError(message);
+      await removeDelivery(deliveryId);
+    } catch {
+      // errore gestito dall'hook
     }
   };
 
   const handleSubmit = async (formData) => {
     try {
-      setFormError(null);
-      if (editingItem) {
-        await updateDelivery(editingItem.id, formData);
-        showSuccess("Consegna aggiornata con successo");
-      } else {
-        await createDelivery(formData);
-        showSuccess("Consegna creata con successo");
-      }
-      await refetch();
-      setIsModalOpen(false);
-      setEditingItem(null);
-    } catch (err) {
-      const message =
-        err?.response?.data?.error ||
-        err?.message ||
-        "Si è verificato un errore imprevisto";
-      setFormError(message);
+      await saveDelivery(formData);
+    } catch {
+      // errore gestito dall'hook (stato `saveError`)
     }
   };
 
@@ -260,7 +272,7 @@ export const Deliveries = () => {
           <Button
             onClick={() => {
               setEditingItem(null);
-              setFormError(null);
+              resetSaveError();
               setIsModalOpen(true);
             }}
           >
@@ -342,7 +354,7 @@ export const Deliveries = () => {
                         size="icon-sm"
                         onClick={() => {
                           setEditingItem(delivery);
-                          setFormError(null);
+                          resetSaveError();
                           setIsModalOpen(true);
                         }}
                       >
@@ -375,14 +387,14 @@ export const Deliveries = () => {
         onClose={() => {
           setIsModalOpen(false);
           setEditingItem(null);
-          setFormError(null);
+          resetSaveError();
         }}
         title={editingItem ? "Modifica consegna" : "Nuova consegna"}
       >
         <DeliveryForm
           initialData={editingItem}
           onSubmit={handleSubmit}
-          error={formError}
+          error={saveError}
         />
       </Modal>
       <Modal
