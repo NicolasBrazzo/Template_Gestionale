@@ -16,6 +16,7 @@ import { showSuccess } from "../utils/toast";
 import { USERS_COLUMN_LABELS } from "../constants/columnLabels";
 import { useFetch } from "../hooks/useFetch";
 import { useMutation } from "../hooks/useMutation";
+import { validateEmail, validatePassword } from "../utils/validators";
 import { DataTable } from "../components/DataTable";
 
 const UsersForm = ({ initialData, onSubmit, error }) => {
@@ -131,8 +132,18 @@ export const Users = () => {
     error: saveError,
     reset: resetSaveError,
   } = useMutation(
-    (formData) =>
-      editingItem ? updateUser(editingItem.id, formData) : createUser(formData),
+    (formData) => {
+      if (!validateEmail(formData.email)) {
+        throw new Error("Formato email non valido: deve essere nel formato testo@dominio.tld");
+      }
+      // Password obbligatoria in creazione; in modifica si valida solo se inserita.
+      if ((!editingItem || formData.password) && !validatePassword(formData.password)) {
+        throw new Error("La password deve contenere almeno 6 caratteri, una lettera maiuscola, un numero e un carattere speciale");
+      }
+      return editingItem
+        ? updateUser(editingItem.id, formData)
+        : createUser(formData);
+    },
     {
       onSuccess: () => {
         showSuccess(

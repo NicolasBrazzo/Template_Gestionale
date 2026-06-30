@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useMutation } from "../hooks/useMutation";
+import { validateEmail } from "../utils/validators";
 import { showSuccess } from "../utils/toast";
 import Loader from "../components/Loader";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,9 @@ export const Login = () => {
     error,
   } = useMutation(
     async (credentials) => {
+      if (!validateEmail(credentials.email)) {
+        throw new Error("Formato email non valido: deve essere nel formato testo@dominio.tld");
+      }
       const res = await login(credentials);
       if (!res.ok) throw new Error(res.message);
       return res;
@@ -97,10 +101,19 @@ export const Login = () => {
           </form>
         </div>
 
-        <div className="text-center">
+        <div className="text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Non hai un account?{" "}
+            <Link
+              to="/register"
+              className="text-foreground hover:underline transition-colors"
+            >
+              Registrati
+            </Link>
+          </p>
           <Link
             to="/delivery-track"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Traccia la tua spedizione →
           </Link>

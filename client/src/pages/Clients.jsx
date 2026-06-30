@@ -19,6 +19,7 @@ import { sortByField } from "../utils/sortHelpers";
 
 import {useFetch} from "../hooks/useFetch";
 import { useMutation } from "../hooks/useMutation";
+import { validateEmail, validatePhoneNumber } from "../utils/validators";
 
 const ClientForm = ({ initialData, onSubmit, error }) => {
   const [formState, setFormState] = useState({
@@ -194,8 +195,17 @@ export const Clients = () => {
     error: saveError,
     reset: resetSaveError,
   } = useMutation(
-    (formData) =>
-      editingItem ? updateClient(editingItem.id, formData) : createClient(formData),
+    (formData) => {
+      if (!validateEmail(formData.email)) {
+        throw new Error("Formato email non valido: deve essere nel formato testo@dominio.tld");
+      }
+      if (!validatePhoneNumber(formData.phone)) {
+        throw new Error("Numero di telefono non valido: deve essere nel formato +39XXXXXXXXXX");
+      }
+      return editingItem
+        ? updateClient(editingItem.id, formData)
+        : createClient(formData);
+    },
     {
       onSuccess: () => {
         showSuccess(

@@ -55,6 +55,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const register = async (payload) => {
+    try {
+      const res = await api.post("/auth/register", payload);
+      if (res.data.ok && res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        await checkAuth();
+        return { ok: true, message: "Register success" };
+      }
+      return { ok: false, message: res.data?.error || "Register failed" };
+    } catch (err) {
+      return { ok: false, message: err.message };
+    }
+  };
+
   const logout = async () => {
     try {
       await api.post("/auth/logout");
@@ -66,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

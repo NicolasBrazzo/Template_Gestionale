@@ -19,6 +19,7 @@ import { DELIVERY_COLUMN_LABELS } from "../constants/columnLabels";
 import { Edit, Trash } from "lucide-react";
 import { useFetch } from "../hooks/useFetch";
 import { useMutation } from "../hooks/useMutation";
+import { validateDeliveryDates } from "../utils/validators";
 
 const STATUS_CONFIG = {
   da_ritirare: { label: "Da ritirare", variant: "warning" },
@@ -163,10 +164,14 @@ export const Deliveries = () => {
     error: saveError,
     reset: resetSaveError,
   } = useMutation(
-    (formData) =>
-      editingItem
+    (formData) => {
+      if (!validateDeliveryDates(formData.collection_date, formData.delivery_date)) {
+        throw new Error("La data di consegna non può essere precedente alla data di raccolta");
+      }
+      return editingItem
         ? updateDelivery(editingItem.id, formData)
-        : createDelivery(formData),
+        : createDelivery(formData);
+    },
     {
       onSuccess: () => {
         showSuccess(

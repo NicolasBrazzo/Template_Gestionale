@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Login } from "./pages/Login.jsx";
+import { Register } from "./pages/Register.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { PrivateRoute } from "./api/components/PrivateRoute.jsx";
 import { Dashboard } from "./pages/Dashboard.jsx";
@@ -21,6 +22,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/delivery-track" element={<DeliveryTrack />} />
               <Route element={<PrivateRoute />}>
                 <Route element={<AppLayout />}>
