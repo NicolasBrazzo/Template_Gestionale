@@ -94,10 +94,6 @@ const UsersForm = ({ initialData, onSubmit, error }) => {
 
 const COLUMNS = [
   {
-    key: "id",
-    label: USERS_COLUMN_LABELS.id,
-  },
-  {
     key: "email",
     label: USERS_COLUMN_LABELS.email,
     sortable: true,

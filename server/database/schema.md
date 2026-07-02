@@ -5,37 +5,46 @@ file è la documentazione leggibile (per umani e AI). Il file affiancato
 [`schema.sql`](./schema.sql) è la fonte di verità tecnica/ricreabile.
 
 > ⚠️ Documentazione mantenuta a mano. Dopo ogni modifica allo schema su Supabase,
-> aggiornare **sia** questo file **sia** `schema.sql`.
+> aggiornare **sia** questo file **sia** `schema.sql`, e registrare la modifica
+> in [`CHANGELOG.md`](./CHANGELOG.md) con il numero progressivo (`#001`, `#002`, …).
 
-Convenzione nomi tabella: prefisso `ECE_`.
+## Convenzioni
+
+- **Prefisso tabelle**: ogni progetto nato dal template sceglie un proprio
+  prefisso (qui `ECE_`, ereditato dal progetto di origine). Per cambiarlo:
+  rinominare le tabelle su Supabase e aggiornare la costante `TABLE_NAME`
+  in ogni file dentro `server/models/`.
+- **Colonne standard**: ogni nuova tabella include `id uuid` (PK, default
+  `gen_random_uuid()`) e `created_at timestamptz` (default `now()`);
+  aggiungere `updated_at` se serve tracciare le modifiche.
 
 ---
 
 ## Diagramma relazioni
 
 ```
-ECE_Users        (autenticazione / utenti del gestionale)
-
-ECE_Clients ──1──< ECE_Deliveries
-   (id)              (client_id → ECE_Clients.id)
+T_Users        (autenticazione / utenti del gestionale)
 ```
 
-- Un **cliente** può avere molte **consegne**.
-- Una **consegna** appartiene a un solo cliente (`client_id`).
+Il template parte con la sola tabella utenti: è l'unica davvero universale.
+Le tabelle di dominio (anagrafiche, ordini, consegne, …) vanno aggiunte
+progetto per progetto — vedi l'esempio in fondo e la ricetta in
+[`../../ADDING_A_RESOURCE.md`](../../ADDING_A_RESOURCE.md).
 
 ---
 
-## Tabella: `ECE_Users`
+## Tabella: `T_Users`
 
 Utenti che accedono al gestionale. La lista utenti espone solo `id, email, isAdmin`
 (la `password` non viene mai restituita al client).
 
-| Colonna    | Tipo         | Null | Default            | Note                                              |
-| ---------- | ------------ | ---- | ------------------ | ------------------------------------------------- |
-| `id`       | uuid         | NO   | `gen_random_uuid()`| Primary key                                       |
-| `email`    | text         | NO   | —                  | Univoca. Usata per login e lookup                 |
-| `password` | text         | NO   | —                  | Hash bcrypt — **mai** in chiaro, mai esposta      |
-| `isAdmin`  | boolean      | NO   | `false`            | Flag privilegi amministratore                     |
+| Colonna      | Tipo        | Null | Default             | Note                                         |
+| ------------ | ----------- | ---- | ------------------- | -------------------------------------------- |
+| `id`         | uuid        | NO   | `gen_random_uuid()` | Primary key                                  |
+| `email`      | text        | NO   | —                   | Univoca. Usata per login e lookup            |
+| `password`   | text        | NO   | —                   | Hash bcrypt — **mai** in chiaro, mai esposta |
+| `isAdmin`    | boolean     | NO   | `false`             | Flag privilegi amministratore                |
+| `created_at` | timestamptz | NO   | `now()`             | Data creazione account                       |
 
 **Vincoli**
 - `email` UNIQUE.
@@ -46,60 +55,25 @@ Utenti che accedono al gestionale. La lista utenti espone solo `id, email, isAdm
 
 ---
 
-## Tabella: `ECE_Clients`
+## Esempio: aggiungere una tabella di dominio
 
-Anagrafica clienti.
+Traccia da seguire quando il progetto ha bisogno di una nuova risorsa
+(esempio: un'anagrafica clienti):
 
-| Colonna     | Tipo | Null | Default             | Note                          |
-| ----------- | ---- | ---- | ------------------- | ----------------------------- |
-| `id`        | uuid | NO   | `gen_random_uuid()` | Primary key                   |
-| `name`      | text | NO   | —                   | Ragione sociale / nominativo  |
-| `via`       | text | SÌ   | —                   | Indirizzo (via e civico)      |
-| `comune`    | text | SÌ   | —                   | Comune                        |
-| `provincia` | text | SÌ   | —                   | Provincia (sigla)             |
-| `phone`     | text | SÌ   | —                   | Telefono                      |
-| `email`     | text | SÌ   | —                   | Email del cliente             |
-| `note`      | text | SÌ   | —                   | Note libere                   |
+```sql
+create table if not exists "ECE_Clients" (
+    "id"         uuid        primary key default gen_random_uuid(),
+    "name"       text        not null,
+    "email"      text        unique,
+    "phone"      text,
+    "note"       text,
+    "created_at" timestamptz not null default now()
+);
+```
 
-**Vincoli**
-- `email` consigliata UNIQUE (il model fa lookup per email: `findClientByEmail`).
-
-**Validazione applicativa**
-- `name`: min 2 caratteri, solo lettere/spazi/apostrofi/trattini.
-- `phone`: numero italiano, con o senza prefisso `+39`, 9–10 cifre nazionali.
-- `email`: formato email valido.
-
----
-
-## Tabella: `ECE_Deliveries`
-
-Consegne/spedizioni associate ai clienti.
-
-| Colonna           | Tipo | Null | Default             | Note                                                   |
-| ----------------- | ---- | ---- | ------------------- | ------------------------------------------------------ |
-| `id`              | uuid | NO   | `gen_random_uuid()` | Primary key                                            |
-| `client_id`       | uuid | NO   | —                   | FK → `ECE_Clients.id`                                   |
-| `collection_date` | date | NO   | —                   | Data di ritiro                                         |
-| `delivery_date`   | date | SÌ   | —                   | Data di consegna (può non essere ancora nota)          |
-| `delivery_key`    | text | NO   | —                   | Codice tracciamento, generato lato app (base36)        |
-| `status`          | text | NO   | `'da_ritirare'`     | Stato consegna — vedi enum sotto                        |
-
-**Stati validi (`status`)** — definiti in `server/controllers/deliveries.controller.js`:
-
-| Valore         | Significato   |
-| -------------- | ------------- |
-| `da_ritirare`  | Da ritirare   |
-| `in_deposito`  | In deposito   |
-| `in_consegna`  | In consegna   |
-| `consegnato`   | Consegnato    |
-| `in_giacenza`  | In giacenza   |
-
-**Vincoli**
-- `client_id` FOREIGN KEY → `ECE_Clients(id)`.
-- `delivery_key` consigliato UNIQUE (lookup pubblico di tracciamento per `delivery_key` + `collection_date`).
-- `status` consigliato come `CHECK` sull'enum sopra (oppure tipo ENUM Postgres).
-
-**Indici consigliati**
-- `client_id` (filtro consegne per cliente).
-- `status` (filtro consegne per stato).
-- `(delivery_key, collection_date)` (tracciamento pubblico).
+Checklist:
+1. Creare la tabella su Supabase.
+2. Aggiungerla a `schema.sql` e documentarla qui (colonne, vincoli, validazioni).
+3. Registrare la modifica in `CHANGELOG.md` con il numero progressivo.
+4. Se ha stati/enum, preferire un vincolo `CHECK` e documentare i valori validi.
+5. Indici sui campi usati per filtri e lookup frequenti.

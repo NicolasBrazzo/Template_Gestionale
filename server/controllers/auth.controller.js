@@ -70,15 +70,22 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Register (registrazione pubblica: crea sempre un utente normale)
+// Register (registrazione pubblica: il campo isAdmin è opzionale, default false)
 router.post("/register", async (req, res) => {
   try {
-    const { email, password, repeatPassword } = req.body;
+    const { email, password, repeatPassword, isAdmin } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         ok: false,
         error: "Email e password sono obbligatorie",
+      });
+    }
+
+    if (isAdmin !== undefined && typeof isAdmin !== "boolean") {
+      return res.status(400).json({
+        ok: false,
+        error: "Il campo isAdmin deve essere un booleano",
       });
     }
 
@@ -114,8 +121,9 @@ router.post("/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // isAdmin forzato a false: la registrazione pubblica non concede privilegi
-    const user = await createNewUser(email, hashedPassword, false);
+    // ATTENZIONE: rotta pubblica che accetta isAdmin — chiunque può registrarsi
+    // come admin. Scelta voluta per il template, da proteggere nei progetti reali.
+    const user = await createNewUser(email, hashedPassword, isAdmin === true);
 
     const token = jwt.sign(
       {

@@ -1,6 +1,6 @@
 const supabase = require("../config/db_connection");
 
-const TABLE_NAME = "ECE_Users";
+const TABLE_NAME = "T_Users";
 
 // get all users 
 const findAllUsers = async () => {
@@ -95,7 +95,6 @@ const findUserById = async (id) => {
 
   return data;
 };
-
 
 
 module.exports = {

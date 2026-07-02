@@ -8,6 +8,7 @@ import Loader from "../components/Loader";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { APP_NAME, APP_LOGO } from "../constants/app";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -59,9 +60,9 @@ export const Login = () => {
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-            <span className="text-2xl leading-none">🚚</span>
+            <span className="text-2xl leading-none">{APP_LOGO}</span>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Corriere Espresso</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{APP_NAME}</h1>
           <p className="text-sm text-muted-foreground">Accedi al gestionale</p>
         </div>
 
@@ -111,12 +112,6 @@ export const Login = () => {
               Registrati
             </Link>
           </p>
-          <Link
-            to="/delivery-track"
-            className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Traccia la tua spedizione →
-          </Link>
         </div>
       </div>
     </div>

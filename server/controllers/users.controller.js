@@ -9,18 +9,11 @@ const {
   deleteUserById,
 } = require("../models/user.model");
 const protect = require("../middleware/auth");
+const isAdmin = require("../middleware/isAdmin");
 const { validateEmail } = require("../utils/validateEmail");
 const { validatePassword } = require("../utils/validatePassword");
 
 const router = express.Router();
-
-// middleware to check if user is admin
-const isAdmin = (req, res, next) => {
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ ok: false, error: "Accesso non autorizzato" });
-  }
-  next();
-};
 
 // Get All Users
 router.get("/", protect, isAdmin, async (req, res) => {
