@@ -7,9 +7,8 @@ deployato: è lo stesso usato in locale).
 **Ordine**: prima il backend (serve il suo URL per configurare il frontend),
 poi il frontend, poi si torna su Railway per il CORS.
 
-> Prerequisiti: repo pushato su GitHub; account Railway e Vercel collegati a
-> GitHub. Su Railway verificare di avere **crediti/trial attivi** — farlo il
-> giorno prima, non scoprirlo durante la consegna.
+> Prerequisiti: repo pushato su GitHub; account Railway e Vercel collegati a GitHub. 
+> Su Railway verificare di avere **crediti/trial attivi** — farlo il giorno prima, non scoprirlo durante la consegna.
 
 ---
 
