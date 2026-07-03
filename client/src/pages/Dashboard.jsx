@@ -4,6 +4,7 @@ import { UserCog, ArrowRight, Rocket } from "lucide-react";
 
 import { fetchUsers } from "../services/userService";
 import { useFetch } from "../hooks/useFetch";
+import { ROLE_LABELS } from "../constants/app";
 
 export const Dashboard = () => {
   const { user, loading } = useAuth();
@@ -39,7 +40,7 @@ export const Dashboard = () => {
           </span>
           {user.isAdmin && (
             <span className="ml-2 inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/20">
-              Admin
+              {ROLE_LABELS.admin}
             </span>
           )}
         </p>

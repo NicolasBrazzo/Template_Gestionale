@@ -85,7 +85,7 @@ React 19 + Vite + React Router 7 + Tailwind CSS v4 + shadcn/ui (Radix) component
 - `src/utils/toast.js` — `showSuccess` / `showError` wrappers over react-toastify (`<ToastContainer/>` mounted in `App.jsx`).
 - `src/utils/validators/` — client-side validators mirroring the server's; re-exported via `validators/index.js`.
 - `src/constants/columnLabels.js` — Italian column-header label maps for the tables.
-- `src/constants/app.js` — app name/logo branding, referenced by Sidebar/Login/Register. Customize here (plus `<title>` in `index.html`) when starting a new project from the template.
+- `src/constants/app.js` — app name/logo branding plus `ROLE_LABELS` (display names for the isAdmin true/false roles, used by Register/Users/Dashboard). Customize here (plus `<title>` in `index.html`) when starting a new project from the template.
 - `src/components/ui/` — shadcn/ui primitives (configured via `components.json`); other reusable components (`DataTable`, `Modal`, `Loader`, `Side`) live in `src/components/`.
 
 **Page pattern** (see `src/pages/Users.jsx` as the reference): a page composes `useFetch` for the list + `useMutation` for create/update/delete, an inline `*Form` subcomponent driven by local `formState`, a `Modal` for create/edit and another for view-details, client-side validation inside the mutation fn (throw to surface `saveError`), and `refetch()` in `onSuccess`.

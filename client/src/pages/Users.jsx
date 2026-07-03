@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import Modal from "@/components/Modal";
 import { showSuccess } from "../utils/toast";
 import { USERS_COLUMN_LABELS } from "../constants/columnLabels";
+import { ROLE_LABELS } from "../constants/app";
 import { useFetch } from "../hooks/useFetch";
 import { useMutation } from "../hooks/useMutation";
 import { validateEmail, validatePassword, validateName } from "../utils/validators";
@@ -106,7 +107,7 @@ const UsersForm = ({ initialData, onSubmit, error }) => {
           className="h-4 w-4 rounded border-input accent-primary"
         />
         <Label htmlFor="isAdmin" className="cursor-pointer">
-          Utente amministratore
+          {ROLE_LABELS.admin}
         </Label>
       </div>
 
@@ -143,9 +144,9 @@ const COLUMNS = [
     sortType: "boolean",
     render: (user) =>
       user.isAdmin ? (
-        <Badge variant="indigo">Admin</Badge>
+        <Badge variant="indigo">{ROLE_LABELS.admin}</Badge>
       ) : (
-        <Badge variant="muted">Utente</Badge>
+        <Badge variant="muted">{ROLE_LABELS.user}</Badge>
       ),
   },
 ];

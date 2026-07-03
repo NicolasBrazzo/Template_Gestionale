@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { APP_NAME, APP_LOGO } from "../constants/app";
+import { APP_NAME, APP_LOGO, ROLE_LABELS } from "../constants/app";
 
 export const Register = () => {
   const [firstName, setFirstName] = useState("");
@@ -150,7 +150,7 @@ export const Register = () => {
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="isAdmin">Registrati come amministratore</Label>
+              <Label htmlFor="isAdmin">Registrati come {ROLE_LABELS.admin.toLowerCase()}</Label>
               <Switch id="isAdmin" checked={isAdmin} onCheckedChange={setIsAdmin} />
             </div>
 
