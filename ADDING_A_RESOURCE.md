@@ -27,6 +27,12 @@ pattern completo è la risorsa **Utenti** (`server/controllers/users.controller.
 3. **Mount** — in `server.js`: `app.use("/<risorsa>", require("./controllers/<risorsa>.controller"));`
 4. **Documentazione** — aggiungi ogni rotta a `server/ENDPOINTS.md` nella
    stessa modifica.
+5. **Collection Postman** — aggiungi una cartella con le richieste della
+   risorsa a `server/postman_collection.json` (stesso pattern delle cartelle
+   esistenti: `{{baseUrl}}` + Bearer `{{token}}` ereditato dalla collection).
+6. **Seed** — se la risorsa serve ai casi d'uso da testare, popola dati
+   realistici in `server/database/seed.js` (stati diversi, più utenti, casi
+   utili a filtri e statistiche).
 
 ## 3. Frontend (`client/`)
 

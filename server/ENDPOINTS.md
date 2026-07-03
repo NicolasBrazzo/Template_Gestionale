@@ -5,6 +5,14 @@ Documentazione delle rotte del backend Express.
 > Questo file è il riferimento di ogni rotta del backend: se aggiungi, rimuovi
 > o modifichi un endpoint, aggiorna questo file nella stessa modifica.
 
+## Test delle API con Postman
+
+Nel repo è committata la collection [`postman_collection.json`](./postman_collection.json)
+(Postman → File → Import). Contiene tutte le rotte con la variabile `{{baseUrl}}`
+(default `http://localhost:3000` — per il deploy sostituirla con il dominio del
+backend) e `{{token}}`, valorizzata automaticamente dopo Login/Register.
+Se aggiungi o modifichi un endpoint, aggiorna anche la collection.
+
 ## Credenziali di test
 
 Create dal seed (`npm run seed` da dentro `server/`, rilanciabile senza duplicati):
