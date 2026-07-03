@@ -5,6 +5,15 @@ Documentazione delle rotte del backend Express.
 > Questo file è il riferimento di ogni rotta del backend: se aggiungi, rimuovi
 > o modifichi un endpoint, aggiorna questo file nella stessa modifica.
 
+## Credenziali di test
+
+Create dal seed (`npm run seed` da dentro `server/`, rilanciabile senza duplicati):
+
+| Ruolo  | Email             | Password     |
+|--------|-------------------|--------------|
+| Admin  | `admin@test.it`   | `Admin123!`  |
+| Utente | `utente@test.it`  | `Utente123!` |
+
 ## Convenzioni generali
 
 - **Base URL**: definito dalla porta del server (`PORT`, default `3000`). Es. `http://localhost:3000`.

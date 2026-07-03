@@ -34,6 +34,7 @@ Run these from inside `client/` or `server/` respectively.
 **Server** (`server/`):
 - `npm run dev` — nodemon (auto-reload) on `server.js`
 - `npm start` — plain `node server.js`
+- `npm run seed` — seeds test users (idempotent; credentials listed in `server/ENDPOINTS.md`). Domain entities get added to `server/database/seed.js` per project.
 
 There is no test suite in either package.
 
