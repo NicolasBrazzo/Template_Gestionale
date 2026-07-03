@@ -121,7 +121,39 @@ const UsersForm = ({ initialData, onSubmit, error }) => {
   );
 };
 
-const COLUMNS = [
+// Dettaglio di sola lettura, mostrato nel modal "view details"
+const UserDetails = ({ user }) => {
+  if (!user) return null;
+
+  const rows = [
+    [USERS_COLUMN_LABELS.last_name, user.last_name],
+    [USERS_COLUMN_LABELS.first_name, user.first_name],
+    [USERS_COLUMN_LABELS.email, user.email],
+    [
+      USERS_COLUMN_LABELS.isAdmin,
+      user.isAdmin ? ROLE_LABELS.admin : ROLE_LABELS.user,
+    ],
+    [
+      USERS_COLUMN_LABELS.created_at,
+      user.created_at
+        ? new Date(user.created_at).toLocaleDateString("it-IT")
+        : "—",
+    ],
+  ];
+
+  return (
+    <dl className="space-y-3">
+      {rows.map(([label, value]) => (
+        <div key={label} className="flex items-baseline justify-between gap-4">
+          <dt className="text-sm text-muted-foreground">{label}</dt>
+          <dd className="text-sm font-medium text-right">{value || "—"}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+};
+
+const buildColumns = (onView) => [
   {
     key: "last_name",
     label: USERS_COLUMN_LABELS.last_name,
@@ -136,6 +168,7 @@ const COLUMNS = [
     key: "email",
     label: USERS_COLUMN_LABELS.email,
     sortable: true,
+    onClick: onView,
   },
   {
     key: "isAdmin",
@@ -154,6 +187,7 @@ const COLUMNS = [
 export const Users = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [viewingItem, setViewingItem] = useState(null);
 
   const {
     data: users,
@@ -261,7 +295,7 @@ export const Users = () => {
 
       {hasUsers && (
         <DataTable
-          columns={COLUMNS}
+          columns={buildColumns((user) => setViewingItem(user))}
           data={users}
           actions={{
             onEdit: (user) => {
@@ -294,6 +328,14 @@ export const Users = () => {
           onSubmit={handleSubmit}
           error={saveError}
         />
+      </Modal>
+
+      <Modal
+        isOpen={!!viewingItem}
+        onClose={() => setViewingItem(null)}
+        title="Dettaglio utente"
+      >
+        <UserDetails user={viewingItem} />
       </Modal>
     </div>
   );
