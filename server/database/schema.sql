@@ -9,9 +9,9 @@
 -- vincoli reali sulla dashboard ed eventualmente correggere qui.
 --
 -- CONVENZIONE PREFISSO: ogni progetto nato da questo template sceglie un
--- proprio prefisso per le tabelle (qui `ECE_`, ereditato dal progetto di
--- origine). Per cambiarlo: rinominare le tabelle su Supabase e aggiornare
--- la costante TABLE_NAME in ogni file dentro server/models/.
+-- proprio prefisso per le tabelle (nel template è `T_`, neutro). Per
+-- cambiarlo: rinominare le tabelle su Supabase e aggiornare la costante
+-- TABLE_NAME in ogni file dentro server/models/.
 --
 -- CONVENZIONE COLONNE: ogni nuova tabella include `created_at` (e, se serve
 -- tracciare le modifiche, `updated_at`).

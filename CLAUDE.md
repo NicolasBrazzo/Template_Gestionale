@@ -64,8 +64,8 @@ Layered, CommonJS. Request flows: **route/controller → model → Supabase**.
 - Error strings are Italian and returned to the user.
 
 **Data model** (see `server/database/schema.sql` + `schema.md`, kept in sync manually — they are reconstructed from app code, NOT exported from Supabase; changes are logged in `server/database/CHANGELOG.md`):
-- `ECE_Users` (uuid id, email unique, bcrypt password, isAdmin bool, created_at) — the only base table of the template.
-- Table-name prefix (`ECE_`) is a per-project convention; new tables follow the column conventions in `schema.md` (uuid PK + `created_at`).
+- `T_Users` (uuid id, email unique, bcrypt password, isAdmin bool, first_name, last_name, created_at) — the only base table of the template.
+- Table-name prefix (`T_` in the template) is a per-project convention; new tables follow the column conventions in `schema.md` (uuid PK + `created_at`).
 
 ## Auth model
 
@@ -77,7 +77,7 @@ React 19 + Vite + React Router 7 + Tailwind CSS v4 + shadcn/ui (Radix) component
 
 - `src/api/client.js` — the single configured Axios instance. Request interceptor injects the bearer token; response interceptor **normalizes all errors** to `{ status, message }` (joins array errors, handles network-down). Always call the API through this instance.
 - `src/context/AuthContext.jsx` — `AuthProvider` + `useAuth()`. On mount, validates the stored token via `/auth/me` and exposes `{ user, loading, login, register, logout }`. `user` is `undefined` while loading, then `null` or a user object.
-- `src/api/components/PrivateRoute.jsx` — route guard; renders `<Outlet/>` when authenticated, redirects to `/` otherwise. In `App.jsx`, protected pages nest inside `PrivateRoute` → `AppLayout`. Public routes: `/` (Login), `/register`.
+- `src/components/PrivateRoute.jsx` — route guard; renders `<Outlet/>` when authenticated, redirects to `/` otherwise. In `App.jsx`, protected pages nest inside `PrivateRoute` → `AppLayout`. Public routes: `/` (Login), `/register`.
 - `src/services/*Service.js` — one module per resource wrapping `api` calls; unwrap the response (e.g. return `res.data.users`) and re-throw errors as plain `Error(message)`.
 - `src/hooks/useFetch.js` — for GETs; auto-runs on mount/deps change, returns `{ data, isLoading, error, refetch }`.
 - `src/hooks/useMutation.js` — for POST/PUT/DELETE; manual `mutate(...)`, returns `{ mutate, isLoading, error, reset }`, supports `{ onSuccess, onError }`. (Note: `@tanstack/react-query` is also installed and wraps the app, but pages currently use these custom hooks.)

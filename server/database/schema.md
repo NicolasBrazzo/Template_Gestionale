@@ -11,9 +11,9 @@ file è la documentazione leggibile (per umani e AI). Il file affiancato
 ## Convenzioni
 
 - **Prefisso tabelle**: ogni progetto nato dal template sceglie un proprio
-  prefisso (qui `ECE_`, ereditato dal progetto di origine). Per cambiarlo:
-  rinominare le tabelle su Supabase e aggiornare la costante `TABLE_NAME`
-  in ogni file dentro `server/models/`.
+  prefisso (nel template è `T_`, neutro). Per cambiarlo: rinominare le
+  tabelle su Supabase e aggiornare la costante `TABLE_NAME` in ogni file
+  dentro `server/models/`.
 - **Colonne standard**: ogni nuova tabella include `id uuid` (PK, default
   `gen_random_uuid()`) e `created_at timestamptz` (default `now()`);
   aggiungere `updated_at` se serve tracciare le modifiche.
@@ -61,7 +61,7 @@ Traccia da seguire quando il progetto ha bisogno di una nuova risorsa
 (esempio: un'anagrafica clienti):
 
 ```sql
-create table if not exists "ECE_Clients" (
+create table if not exists "T_Clients" (
     "id"         uuid        primary key default gen_random_uuid(),
     "name"       text        not null,
     "email"      text        unique,

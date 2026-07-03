@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Controllo adeguato al backend
+  // Valida il token salvato chiedendo al backend i dati dell'utente
   const checkAuth = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -22,11 +22,15 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const res = await api.get("/auth/me");
-      console.log(res);
       if (res.data.user) {
         const u = res.data.user;
-        // Da modificare
-        setUser({ id: u.sub, email: u.email, isAdmin: u.isAdmin });
+        setUser({
+          id: u.sub,
+          email: u.email,
+          isAdmin: u.isAdmin,
+          firstName: u.first_name,
+          lastName: u.last_name,
+        });
       } else {
         localStorage.removeItem("token");
         setUser(null);
@@ -43,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const res = await api.post("/auth/login", credentials);
-      if (res.data.ok && res.data.token) {;
+      if (res.data.ok && res.data.token) {
         localStorage.setItem("token", res.data.token);
         await checkAuth();
         return { ok: true, message: "Login success" };

@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Login } from "./pages/Login.jsx";
 import { Register } from "./pages/Register.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
-import { PrivateRoute } from "./api/components/PrivateRoute.jsx";
+import { PrivateRoute } from "./components/PrivateRoute.jsx";
 import { Dashboard } from "./pages/Dashboard.jsx";
 import { AppLayout } from "./layouts/AppLayout.jsx";
 import { ToastContainer } from "react-toastify";

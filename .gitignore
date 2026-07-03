@@ -22,6 +22,9 @@ client/*.env
 .env.test.local
 .env.production.local
 *.local
+# i file di esempio devono restare versionati
+!.env.example
+!*.env.example
 
 ### Logs
 logs/
