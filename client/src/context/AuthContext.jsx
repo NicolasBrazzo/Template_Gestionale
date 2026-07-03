@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    // DA RIVEDERE
     try {
       const res = await api.get("/auth/me");
       console.log(res);
