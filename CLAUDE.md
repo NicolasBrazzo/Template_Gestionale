@@ -8,6 +8,8 @@ Full-stack management-app **template**: it ships only the universal infrastructu
 
 Monorepo with two independently-installed packages: `client/` (React SPA) and `server/` (Express REST API backed by Supabase/PostgreSQL). There is no root `package.json` — install and run each side separately. User-facing strings and code comments are in Italian.
 
+Deployment (Railway for the server, Vercel for the client) is documented step-by-step in [`DEPLOY.md`](DEPLOY.md).
+
 ## Mandatory working rules
 
 **Database changes:**
