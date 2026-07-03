@@ -16,11 +16,13 @@ import { showSuccess } from "../utils/toast";
 import { USERS_COLUMN_LABELS } from "../constants/columnLabels";
 import { useFetch } from "../hooks/useFetch";
 import { useMutation } from "../hooks/useMutation";
-import { validateEmail, validatePassword } from "../utils/validators";
+import { validateEmail, validatePassword, validateName } from "../utils/validators";
 import { DataTable } from "../components/DataTable";
 
 const UsersForm = ({ initialData, onSubmit, error }) => {
   const [formState, setFormState] = useState({
+    first_name: initialData?.first_name || "",
+    last_name: initialData?.last_name || "",
     email: initialData?.email || "",
     password: initialData?.password || "",
     isAdmin: initialData?.isAdmin ?? false,
@@ -41,6 +43,32 @@ const UsersForm = ({ initialData, onSubmit, error }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="first_name">Nome</Label>
+          <Input
+            id="first_name"
+            type="text"
+            name="first_name"
+            value={formState.first_name}
+            onChange={handleChange}
+            placeholder="Mario"
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="last_name">Cognome</Label>
+          <Input
+            id="last_name"
+            type="text"
+            name="last_name"
+            value={formState.last_name}
+            onChange={handleChange}
+            placeholder="Rossi"
+            required
+          />
+        </div>
+      </div>
       <div className="space-y-1.5">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -94,6 +122,16 @@ const UsersForm = ({ initialData, onSubmit, error }) => {
 
 const COLUMNS = [
   {
+    key: "last_name",
+    label: USERS_COLUMN_LABELS.last_name,
+    sortable: true,
+  },
+  {
+    key: "first_name",
+    label: USERS_COLUMN_LABELS.first_name,
+    sortable: true,
+  },
+  {
     key: "email",
     label: USERS_COLUMN_LABELS.email,
     sortable: true,
@@ -129,6 +167,9 @@ export const Users = () => {
     reset: resetSaveError,
   } = useMutation(
     (formData) => {
+      if (!validateName(formData.first_name) || !validateName(formData.last_name)) {
+        throw new Error("Nome e cognome sono obbligatori (minimo 2 caratteri, solo lettere, spazi, apostrofi e trattini)");
+      }
       if (!validateEmail(formData.email)) {
         throw new Error("Formato email non valido: deve essere nel formato testo@dominio.tld");
       }

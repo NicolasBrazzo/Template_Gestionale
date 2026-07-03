@@ -54,16 +54,18 @@ Registrazione pubblica. **Pubblica.**
 **Body**
 | Campo | Tipo | Obbligatorio | Note |
 |-------|------|--------------|------|
+| `first_name` | string | sì | min 2 caratteri dopo il trim, solo lettere/spazi/apostrofi/trattini |
+| `last_name` | string | sì | come `first_name` |
 | `email` | string | sì | |
 | `password` | string | sì | |
 | `repeatPassword` | string | sì | deve coincidere con `password` |
 | `isAdmin` | boolean | no | default `false`; se presente deve essere un booleano |
 
-**Validazioni**: formato email valido; password conforme alle regole di `validatePassword`; `password === repeatPassword`; `isAdmin` (se presente) booleano.
+**Validazioni**: nome e cognome conformi a `validateName` (mai vuoti o solo spazi); formato email valido; password conforme alle regole di `validatePassword`; `password === repeatPassword`; `isAdmin` (se presente) booleano.
 
 **Risposte**
 - `201` → `{ ok: true, token }`
-- `400` → campi mancanti, email non valida, password non valida, password non coincidenti, `isAdmin` non booleano
+- `400` → campi mancanti, nome/cognome non validi, email non valida, password non valida, password non coincidenti, `isAdmin` non booleano
 - `409` → email già in uso
 
 ---
@@ -113,13 +115,15 @@ Crea un nuovo utente.
 **Body**
 | Campo | Tipo | Obbligatorio | Note |
 |-------|------|--------------|------|
+| `first_name` | string | sì | conforme a `validateName` |
+| `last_name` | string | sì | conforme a `validateName` |
 | `email` | string | sì | formato `testo@dominio.tld` |
 | `password` | string | sì | conforme a `validatePassword` |
 | `isAdmin` | boolean | sì | deve essere un booleano |
 
 **Risposte**
 - `201` → `{ ok: true, user }`
-- `400` → campi mancanti, email o password non valide
+- `400` → campi mancanti, nome/cognome, email o password non validi
 - `409` → email già in uso
 
 ---
@@ -130,13 +134,15 @@ Aggiorna un utente. La `password` è opzionale (se presente viene validata e re-
 **Body**
 | Campo | Tipo | Obbligatorio | Note |
 |-------|------|--------------|------|
+| `first_name` | string | sì | conforme a `validateName` |
+| `last_name` | string | sì | conforme a `validateName` |
 | `email` | string | sì | |
 | `isAdmin` | boolean | sì | |
 | `password` | string | no | se presente, conforme a `validatePassword` |
 
 **Risposte**
 - `200` → `{ ok: true, user }`
-- `400` → campi mancanti, password non valida
+- `400` → campi mancanti, nome/cognome non validi, password non valida
 - `403` → tentativo di rimuovere i propri privilegi admin
 
 ---

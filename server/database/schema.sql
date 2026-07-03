@@ -28,5 +28,7 @@ create table if not exists "T_Users" (
     "email"      text        not null unique,
     "password"   text        not null,           -- hash bcrypt, mai in chiaro
     "isAdmin"    boolean     not null default false,
+    "first_name" text,                           -- obbligatorio a livello applicativo (validateName)
+    "last_name"  text,                           -- obbligatorio a livello applicativo (validateName)
     "created_at" timestamptz not null default now()
 );

@@ -35,7 +35,8 @@ progetto per progetto — vedi l'esempio in fondo e la ricetta in
 
 ## Tabella: `T_Users`
 
-Utenti che accedono al gestionale. La lista utenti espone solo `id, email, isAdmin`
+Utenti che accedono al gestionale. La lista utenti espone solo
+`id, email, isAdmin, first_name, last_name, created_at`
 (la `password` non viene mai restituita al client).
 
 | Colonna      | Tipo        | Null | Default             | Note                                         |
@@ -44,6 +45,8 @@ Utenti che accedono al gestionale. La lista utenti espone solo `id, email, isAdm
 | `email`      | text        | NO   | —                   | Univoca. Usata per login e lookup            |
 | `password`   | text        | NO   | —                   | Hash bcrypt — **mai** in chiaro, mai esposta |
 | `isAdmin`    | boolean     | NO   | `false`             | Flag privilegi amministratore                |
+| `first_name` | text        | SÌ*  | —                   | Nome. *Obbligatorio a livello applicativo    |
+| `last_name`  | text        | SÌ*  | —                   | Cognome. *Obbligatorio a livello applicativo |
 | `created_at` | timestamptz | NO   | `now()`             | Data creazione account                       |
 
 **Vincoli**
@@ -52,6 +55,8 @@ Utenti che accedono al gestionale. La lista utenti espone solo `id, email, isAdm
 **Validazione applicativa**
 - `email`: formato email valido.
 - `password` (prima dell'hash): min 6 caratteri, almeno 1 maiuscola, 1 numero, 1 carattere speciale.
+- `first_name` / `last_name` (`validateName`): obbligatori, min 2 caratteri dopo il trim
+  (quindi mai vuoti o solo spazi), solo lettere/spazi/apostrofi/trattini.
 
 ---
 

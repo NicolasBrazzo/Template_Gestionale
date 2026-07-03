@@ -2,11 +2,11 @@ const supabase = require("../config/db_connection");
 
 const TABLE_NAME = "T_Users";
 
-// get all users 
+// get all users
 const findAllUsers = async () => {
   const { data, error } = await supabase
     .from(TABLE_NAME)
-    .select("id, email, isAdmin");
+    .select("id, email, isAdmin, first_name, last_name, created_at");
   if (error) {
     throw new Error("DATABASE_FIND_ALL_USERS_ERROR");
   }
@@ -14,7 +14,7 @@ const findAllUsers = async () => {
 };
 
 // create new user
-const createNewUser = async ( email, hashedPassword, isAdmin) => {
+const createNewUser = async (email, hashedPassword, isAdmin, firstName, lastName) => {
   const { data, error } = await supabase
     .from(TABLE_NAME)
     .insert([
@@ -22,6 +22,8 @@ const createNewUser = async ( email, hashedPassword, isAdmin) => {
         email,
         password: hashedPassword,
         isAdmin,
+        first_name: firstName,
+        last_name: lastName,
       },
     ])
     .select()

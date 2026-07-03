@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useMutation } from "../hooks/useMutation";
-import { validateEmail, validatePassword } from "../utils/validators";
+import { validateEmail, validatePassword, validateName } from "../utils/validators";
 import { showSuccess } from "../utils/toast";
 import Loader from "../components/Loader";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { APP_NAME, APP_LOGO } from "../constants/app";
 
 export const Register = () => {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,6 +28,9 @@ export const Register = () => {
     error: submitError,
   } = useMutation(
     async (payload) => {
+      if (!validateName(payload.first_name) || !validateName(payload.last_name)) {
+        throw new Error("Nome e cognome sono obbligatori (minimo 2 caratteri, solo lettere, spazi, apostrofi e trattini)");
+      }
       if (!validateEmail(payload.email)) {
         throw new Error("Formato email non valido: deve essere nel formato testo@dominio.tld");
       }
@@ -51,6 +56,8 @@ export const Register = () => {
     e.preventDefault();
     try {
       await doRegister({
+        first_name: firstName,
+        last_name: lastName,
         email,
         password,
         repeatPassword: confirmPassword,
@@ -82,6 +89,31 @@ export const Register = () => {
 
         <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="firstName">Nome</Label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  placeholder="Mario"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="lastName">Cognome</Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Rossi"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input

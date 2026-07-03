@@ -34,7 +34,9 @@ export const Dashboard = () => {
         </p>
         <p className="mt-1 text-sm">
           Utente:{" "}
-          <span className="font-medium">{user.email}</span>
+          <span className="font-medium">
+            {user.firstName ? `${user.firstName} ${user.lastName}` : user.email}
+          </span>
           {user.isAdmin && (
             <span className="ml-2 inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/20">
               Admin

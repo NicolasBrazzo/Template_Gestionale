@@ -53,7 +53,7 @@ Layered, CommonJS. Request flows: **route/controller → model → Supabase**.
 - `models/*.model.js` — pure Supabase data access. Every function queries a table (name in a `TABLE_NAME` constant at the top) and throws a sentinel `Error("DATABASE_*_ERROR")` on failure. No validation or HTTP concerns.
 - `config/db_connection.js` — single shared Supabase client (exported as `supabase`), imported by all models.
 - `config/jwt.js` — centralizes JWT secret/expiry/salt config.
-- `middleware/auth.js` — exported as `protect`. Verifies `Authorization: Bearer <token>`, attaches decoded payload (`{ sub, email, isAdmin }`) to `req.user`. Applied per-route, not globally.
+- `middleware/auth.js` — exported as `protect`. Verifies `Authorization: Bearer <token>`, attaches decoded payload (`{ sub, email, isAdmin, first_name, last_name }`) to `req.user`. Applied per-route, not globally.
 - `middleware/isAdmin.js` — admin guard, used after `protect` (checks `req.user.isAdmin`, else 403).
 - `utils/validate*.js` — standalone validators reused across controllers. Includes ready-to-use Italian business validators (`validateCodiceFiscale`, `validatePartitaIva`, `validatePhoneNumber`) even where not yet wired to a route.
 
@@ -69,7 +69,7 @@ Layered, CommonJS. Request flows: **route/controller → model → Supabase**.
 
 ## Auth model
 
-Stateless JWT. Login/register return a token; the client stores it in `localStorage` and sends it via an Axios request interceptor. `logout` is client-side only (removes the token). Public `/auth/register` accepts an optional `isAdmin` boolean (default `false`) with **no restriction** — anyone can self-register as admin. This is a deliberate template/dev convenience: projects derived from the template must lock it down (registration code, whitelist, or drop the field). Admins can also be created/promoted through the admin-guarded `/users` endpoints.
+Stateless JWT. Login/register return a token; the client stores it in `localStorage` and sends it via an Axios request interceptor. `logout` is client-side only (removes the token). Public `/auth/register` requires `first_name`, `last_name` (validated with `validateName`: non-empty, min 2 chars after trim), `email`, `password`, `repeatPassword`, and accepts an optional `isAdmin` boolean (default `false`) with **no restriction** — anyone can self-register as admin. This is a deliberate template/dev convenience: projects derived from the template must lock it down (registration code, whitelist, or drop the field). Admins can also be created/promoted through the admin-guarded `/users` endpoints.
 
 ## Frontend architecture
 

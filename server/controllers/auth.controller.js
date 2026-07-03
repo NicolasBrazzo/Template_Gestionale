@@ -6,6 +6,7 @@ const { findUserByEmail, createNewUser } = require("../models/user.model");
 const protect = require("../middleware/auth");
 const { validateEmail } = require("../utils/validateEmail");
 const { validatePassword } = require("../utils/validatePassword");
+const { validateName } = require("../utils/validateName");
 
 const {
   JWT_SECRET,
@@ -49,7 +50,9 @@ router.post("/login", async (req, res) => {
       {
         sub: user.id,
         email: user.email,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        first_name: user.first_name,
+        last_name: user.last_name,
       },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
@@ -73,12 +76,19 @@ router.post("/login", async (req, res) => {
 // Register (registrazione pubblica: il campo isAdmin è opzionale, default false)
 router.post("/register", async (req, res) => {
   try {
-    const { email, password, repeatPassword, isAdmin } = req.body;
+    const { email, password, repeatPassword, isAdmin, first_name, last_name } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         ok: false,
         error: "Email e password sono obbligatorie",
+      });
+    }
+
+    if (!validateName(first_name) || !validateName(last_name)) {
+      return res.status(400).json({
+        ok: false,
+        error: "Nome e cognome sono obbligatori (minimo 2 caratteri, solo lettere, spazi, apostrofi e trattini)",
       });
     }
 
@@ -123,13 +133,21 @@ router.post("/register", async (req, res) => {
 
     // ATTENZIONE: rotta pubblica che accetta isAdmin — chiunque può registrarsi
     // come admin. Scelta voluta per il template, da proteggere nei progetti reali.
-    const user = await createNewUser(email, hashedPassword, isAdmin === true);
+    const user = await createNewUser(
+      email,
+      hashedPassword,
+      isAdmin === true,
+      first_name.trim(),
+      last_name.trim()
+    );
 
     const token = jwt.sign(
       {
         sub: user.id,
         email: user.email,
         isAdmin: user.isAdmin,
+        first_name: user.first_name,
+        last_name: user.last_name,
       },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }

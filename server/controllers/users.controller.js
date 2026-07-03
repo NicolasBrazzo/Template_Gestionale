@@ -12,6 +12,7 @@ const protect = require("../middleware/auth");
 const isAdmin = require("../middleware/isAdmin");
 const { validateEmail } = require("../utils/validateEmail");
 const { validatePassword } = require("../utils/validatePassword");
+const { validateName } = require("../utils/validateName");
 
 const router = express.Router();
 
@@ -44,13 +45,21 @@ router.get("/:id", protect, isAdmin, async (req, res) => {
 // Create User
 router.post("/", protect, isAdmin, async (req, res) => {
   try {
-    const { email, password, isAdmin } = req.body;
+    const { email, password, isAdmin, first_name, last_name } = req.body;
 
     // Validazione base dei campi
     if (!email || !password || typeof isAdmin !== "boolean") {
       return res.status(400).json({
         ok: false,
         error: "Campi obbligatori mancanti: email, password, tipo utente",
+      });
+    }
+
+    // Validazione nome e cognome
+    if (!validateName(first_name) || !validateName(last_name)) {
+      return res.status(400).json({
+        ok: false,
+        error: "Nome e cognome sono obbligatori (minimo 2 caratteri, solo lettere, spazi, apostrofi e trattini)",
       });
     }
 
@@ -81,7 +90,13 @@ router.post("/", protect, isAdmin, async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await createNewUser(email, hashedPassword, isAdmin);
+    const user = await createNewUser(
+      email,
+      hashedPassword,
+      isAdmin,
+      first_name.trim(),
+      last_name.trim()
+    );
     return res.status(201).json({ ok: true, user });
   } catch (err) {
     console.error("CREATE USER ERROR:", err);
@@ -93,7 +108,7 @@ router.post("/", protect, isAdmin, async (req, res) => {
 router.put("/:id", protect, isAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { email, password, isAdmin } = req.body;
+    const { email, password, isAdmin, first_name, last_name } = req.body;
 
     if (String(req.user.sub) === id && req.user.isAdmin && isAdmin === false) {
       return res.status(403).json({
@@ -110,7 +125,20 @@ router.put("/:id", protect, isAdmin, async (req, res) => {
       });
     }
 
-    let updateData = { email, isAdmin };
+    // Validazione nome e cognome
+    if (!validateName(first_name) || !validateName(last_name)) {
+      return res.status(400).json({
+        ok: false,
+        error: "Nome e cognome sono obbligatori (minimo 2 caratteri, solo lettere, spazi, apostrofi e trattini)",
+      });
+    }
+
+    let updateData = {
+      email,
+      isAdmin,
+      first_name: first_name.trim(),
+      last_name: last_name.trim(),
+    };
 
     if (password) {
       const passwordErrors = validatePassword(password);
