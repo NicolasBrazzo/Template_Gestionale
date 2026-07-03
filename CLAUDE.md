@@ -22,7 +22,7 @@ Deployment (Railway for the server, Vercel for the client) is documented step-by
 
 **Endpoints:**
 - Whenever you need to consult the API to debug an issue or to add/modify routes, always read [`server/ENDPOINTS.md`](server/ENDPOINTS.md) first — it is the reference for every backend route.
-- If you add, remove, or modify an endpoint, you MUST update `server/ENDPOINTS.md` to reflect the change in the same edit.
+- If you add, remove, or modify an endpoint, you MUST update `server/ENDPOINTS.md` **and** the Postman collection (`server/postman_collection.json`) to reflect the change in the same edit.
 
 ## Commands
 
@@ -59,7 +59,7 @@ Layered, CommonJS. Request flows: **route/controller → model → Supabase**.
 - `config/jwt.js` — centralizes JWT secret/expiry/salt config.
 - `middleware/auth.js` — exported as `protect`. Verifies `Authorization: Bearer <token>`, attaches decoded payload (`{ sub, email, isAdmin, first_name, last_name }`) to `req.user`. Applied per-route, not globally.
 - `middleware/isAdmin.js` — admin guard, used after `protect` (checks `req.user.isAdmin`, else 403).
-- `utils/validate*.js` — standalone validators reused across controllers. Includes ready-to-use Italian business validators (`validateCodiceFiscale`, `validatePartitaIva`, `validatePhoneNumber`) even where not yet wired to a route.
+- `utils/validate*.js` — standalone validators reused across controllers (`validateEmail`, `validatePassword`, `validateName`). Also includes ready-to-use Italian business validators (`validateCodiceFiscale`, `validatePartitaIva`, `validatePhoneNumber`) even where not yet wired to a route.
 
 **Conventions to follow when adding endpoints:**
 - Every response is JSON shaped `{ ok: true, ... }` or `{ ok: false, error }`. `error` is usually a string but can be an **array** (e.g. `validatePassword` returns a list of failures) — the client joins arrays with `; `.
