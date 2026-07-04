@@ -81,14 +81,14 @@ React 19 + Vite + React Router 7 + Tailwind CSS v4 + shadcn/ui (Radix) component
 
 - `src/api/client.js` — the single configured Axios instance. Request interceptor injects the bearer token; response interceptor **normalizes all errors** to `{ status, message }` (joins array errors, handles network-down). Always call the API through this instance.
 - `src/context/AuthContext.jsx` — `AuthProvider` + `useAuth()`. On mount, validates the stored token via `/auth/me` and exposes `{ user, loading, login, register, logout }`. `user` is `undefined` while loading, then `null` or a user object.
-- `src/components/PrivateRoute.jsx` — route guard; renders `<Outlet/>` when authenticated, redirects to `/` otherwise. In `App.jsx`, protected pages nest inside `PrivateRoute` → `AppLayout`. Public routes: `/` (Login), `/register`.
+- `src/components/PrivateRoute.jsx` — route guard; renders `<Outlet/>` when authenticated, redirects to `/login` otherwise. In `App.jsx`, protected pages nest inside `PrivateRoute` → `AppLayout`. Public routes: `/` (HomePage, GSAP-animated hero), `/login` (Login), `/register`.
 - `src/services/*Service.js` — one module per resource wrapping `api` calls; unwrap the response (e.g. return `res.data.users`) and re-throw errors as plain `Error(message)`.
 - `src/hooks/useFetch.js` — for GETs; auto-runs on mount/deps change, returns `{ data, isLoading, error, refetch }`.
 - `src/hooks/useMutation.js` — for POST/PUT/DELETE; manual `mutate(...)`, returns `{ mutate, isLoading, error, reset }`, supports `{ onSuccess, onError }`. (Note: `@tanstack/react-query` is also installed and wraps the app, but pages currently use these custom hooks.)
 - `src/utils/toast.js` — `showSuccess` / `showError` wrappers over react-toastify (`<ToastContainer/>` mounted in `App.jsx`).
 - `src/utils/validators/` — client-side validators mirroring the server's; re-exported via `validators/index.js`.
 - `src/constants/columnLabels.js` — Italian column-header label maps for the tables.
-- `src/constants/app.js` — app name/logo branding plus `ROLE_LABELS` (display names for the isAdmin true/false roles, used by Register/Users/Dashboard). Customize here (plus `<title>` in `index.html`) when starting a new project from the template.
+- `src/constants/app.js` — app name/logo branding, `ROLE_LABELS` (display names for the isAdmin true/false roles, used by Register/Users/Dashboard), and `HOME` (all copy for the public hero: title/subtitle/CTAs/demo stats & ledger rows). Customize here (plus `<title>` in `index.html`) when starting a new project from the template — the landing uses the shared shadcn tokens, plus the `--font-display`/`--font-data` fonts in `index.css`.
 - `src/components/ui/` — shadcn/ui primitives (configured via `components.json`); other reusable components (`DataTable`, `FilterBar`, `Modal`, `Loader`, `Side`, `PrivateRoute`) live in `src/components/`. `FilterBar` is the config-driven filter strip meant to pair with `useFetch` deps (usage in `PATTERNS.md`).
 
 **Page pattern** (see `src/pages/Users.jsx` as the reference): a page composes `useFetch` for the list + `useMutation` for create/update/delete, an inline `*Form` subcomponent driven by local `formState`, a `Modal` for create/edit and another for view-details, client-side validation inside the mutation fn (throw to surface `saveError`), and `refetch()` in `onSuccess`.

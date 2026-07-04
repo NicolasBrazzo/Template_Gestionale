@@ -166,7 +166,7 @@ export const Register = () => {
 
         <div className="text-center">
           <Link
-            to="/"
+            to="/login"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
           >
             Login

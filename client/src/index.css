@@ -2,6 +2,11 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+@import "@fontsource/ibm-plex-mono/700.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -47,6 +52,12 @@
 @theme {
   --color-accent: var(--accent);
   --color-box-bg: var(--box-bg);
+
+  /* Landing (HomePage): font display (titolo) e dati (numeri/etichette).
+     I testi vivono in src/constants/app.js (HOME); i colori sono i token
+     shadcn condivisi con il resto del gestionale. */
+  --font-display: "Bricolage Grotesque Variable", "Inter Variable", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, monospace;
 }
 
 body {
