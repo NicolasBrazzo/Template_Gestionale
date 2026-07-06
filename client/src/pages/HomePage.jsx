@@ -14,10 +14,17 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Prism from "../components/Prism";
 import { useAuth } from "../context/AuthContext";
 import { APP_NAME, APP_LOGO, HOME } from "../constants/app";
 
 gsap.registerPlugin(useGSAP);
+
+// Se l'utente ha chiesto "riduci movimento" il Prism viene congelato
+// (timeScale/noise a 0): resta un fotogramma statico invece di animare.
+const prefersReducedMotion =
+  typeof window !== "undefined" &&
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 // Voci della sidebar nella finestra dimostrativa (contenuto decorativo).
 const MOCK_NAV = [
@@ -37,11 +44,8 @@ export const HomePage = () => {
   const authTo = user ? "/dashboard" : "/login";
 
   // Titolo spezzato in parole: ogni parola ha una "maschera" per il reveal
-  // dal basso; quelle di titleAccent ricevono la sottolineatura disegnata.
-  const titleWords = [
-    ...HOME.titleStart.split(" ").map((word) => ({ word, accent: false })),
-    ...HOME.titleAccent.split(" ").map((word) => ({ word, accent: true })),
-  ];
+  // dal basso durante l'ingresso.
+  const titleWords = `${HOME.titleStart} ${HOME.titleAccent}`.split(" ");
 
   useGSAP(
     () => {
@@ -58,22 +62,11 @@ export const HomePage = () => {
           defaults: { ease: "power4.out", duration: 0.9 },
         });
         intro
-          .from(".js-bg", { autoAlpha: 0, duration: 1.1, ease: "power2.out" })
-          .from(".js-topbar", { autoAlpha: 0, y: -16, duration: 0.6 }, "-=0.8")
+          .from(".js-prism", { autoAlpha: 0, duration: 1.4, ease: "power2.out" }, 0)
+          .from(".js-topbar", { autoAlpha: 0, y: -16, duration: 0.6 }, 0.3)
           .from(".js-eyebrow", { autoAlpha: 0, y: 12, scale: 0.92, duration: 0.5 }, "-=0.35")
           .from(".js-word", { yPercent: 120, rotation: 5, stagger: 0.055 }, "-=0.3")
-          .fromTo(
-            ".js-underline",
-            { strokeDashoffset: 1 },
-            {
-              strokeDashoffset: 0,
-              duration: 0.5,
-              ease: "power2.inOut",
-              stagger: 0.12,
-            },
-            "-=0.4"
-          )
-          .from(".js-sub", { autoAlpha: 0, y: 14, filter: "blur(8px)", duration: 0.7 }, "-=0.5")
+          .from(".js-sub", { autoAlpha: 0, y: 14, filter: "blur(8px)", duration: 0.7 }, "-=0.4")
           .from(
             ".js-cta-row > *",
             { autoAlpha: 0, y: 12, duration: 0.5, stagger: 0.08 },
@@ -189,17 +182,38 @@ export const HomePage = () => {
   );
 
   return (
-    <div ref={scope} className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      {/* Sfondo: griglia leggera che sfuma verso il basso */}
+    // La landing gira nel contesto "dark" degli stessi token shadcn del
+    // gestionale (nessuna palette a parte): così il Prism WebGL, che rende
+    // al meglio su fondo scuro, resta coerente e il testo leggibile.
+    <div ref={scope} className="dark relative min-h-screen overflow-hidden bg-background text-foreground">
+      {/* Sfondo animato: prisma WebGL (React Bits) confinato alla prima
+          schermata; non cattura il puntatore così CTA e finestra restano
+          interattive. Sospeso quando esce dal viewport per risparmiare GPU. */}
       <div
         aria-hidden="true"
-        className="js-bg pointer-events-none absolute inset-0 mask-[radial-gradient(ellipse_75%_60%_at_50%_0%,#000_55%,transparent_100%)]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)",
-          backgroundSize: "52px 52px",
-        }}
+        className="js-prism pointer-events-none absolute inset-x-0 top-0 h-screen"
+      >
+        <Prism
+          animationType="rotate"
+          timeScale={prefersReducedMotion ? 0 : 0.4}
+          scale={3.2}
+          glow={1}
+          bloom={1.1}
+          noise={prefersReducedMotion ? 0 : 0.35}
+          hueShift={0.32}
+          colorFrequency={1}
+          offset={{ x: 0, y: 90 }}
+          suspendWhenOffscreen
+        />
+      </div>
+
+      {/* Scrim: attenua il prisma dove c'è il testo e sfuma nel fondo pieno
+          prima della finestra dimostrativa, mantenendo il contrasto. */}
+      <div
+        aria-hidden="true"
+        className="js-prism pointer-events-none absolute inset-x-0 top-0 h-screen bg-linear-to-b from-background/70 via-background/25 to-background"
       />
+
 
       <header className="js-topbar relative z-10 mx-auto flex w-full max-w-5xl items-center justify-between px-6 pt-5">
         <div className="flex items-center gap-2.5">
@@ -222,47 +236,20 @@ export const HomePage = () => {
           {HOME.eyebrow}
         </span> */}
 
-        {/* Stili inline perché le regole globali h1 di index.css (35px/700),
-            essendo fuori dai layer, vincono sulle utility Tailwind */}
-        <h1
-          className="mx-auto mt-6 max-w-3xl font-display tracking-tight"
-          style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", lineHeight: 1.06, fontWeight: 800 }}
-        >
-          {titleWords.map(({ word, accent }, i) => (
+        {/* Le regole globali h1 di index.css (35px/700) stanno fuori dai
+            layer e vincono sulle utility Tailwind: per questo font-size e
+            peso usano il modificatore "!". Font normale (Inter, font-sans). */}
+        <h1 className="mx-auto mt-6 max-w-3xl font-sans font-bold! text-[clamp(2.5rem,6vw,4.5rem)]! leading-[1.06] tracking-tight">
+          {titleWords.map((word, i) => (
             <Fragment key={i}>
               <span className="mb-[-0.14em] inline-block overflow-hidden pb-[0.14em] align-top">
-                <span className="js-word inline-block">
-                  {accent ? (
-                    <span className="relative inline-block">
-                      {word}
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 100 10"
-                        preserveAspectRatio="none"
-                        className="absolute inset-x-[-0.04em] bottom-[-0.06em] h-[0.18em] w-[calc(100%+0.08em)] overflow-visible text-indigo-600"
-                      >
-                        <path
-                          className="js-underline"
-                          d="M2 7 C 25 2.5, 75 2.5, 98 5.5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          pathLength="1"
-                          strokeDasharray="1"
-                        />
-                      </svg>
-                    </span>
-                  ) : (
-                    word
-                  )}
-                </span>
+                <span className="js-word inline-block">{word}</span>
               </span>{" "}
             </Fragment>
           ))}
         </h1>
 
-        <p className="js-sub mx-auto mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
+        <p className="js-sub mx-auto mt-5 max-w-xl text-lg leading-relaxed text-foreground/85 [text-shadow:0_1px_12px_var(--background)]">
           {HOME.subtitle}
         </p>
 
@@ -284,7 +271,7 @@ export const HomePage = () => {
           {HOME.features.map((feature) => (
             <span
               key={feature}
-              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
+              className="flex items-center gap-1.5 text-xs font-medium text-foreground/75"
             >
               <Check aria-hidden="true" className="size-3.5 text-indigo-600" />
               {feature}
@@ -297,8 +284,7 @@ export const HomePage = () => {
           agli screen reader. Il wrapper dà la prospettiva per il tilt 3D. */}
       <section
         aria-hidden="true"
-        className="relative z-10 mx-auto w-full max-w-4xl px-6 pb-24 pt-14"
-        style={{ perspective: "1400px" }}
+        className="relative z-10 mx-auto w-full max-w-4xl px-6 pb-24 pt-14 perspective-[1400px]"
       >
         <div
           aria-hidden="true"
