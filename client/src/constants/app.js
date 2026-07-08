@@ -46,3 +46,13 @@ export const HOME = {
     ],
   },
 };
+
+// Contenuti della pagina 404 (rotta catch-all "*", NotFound).
+// Il bottone secondario riusa i CTA di HOME (ctaLogged/ctaPrimary).
+export const NOT_FOUND = {
+  code: "404",
+  title: "Pagina non trovata",
+  subtitle:
+    "La pagina che cerchi non esiste o è stata spostata. Torna alla home per riprendere da dove eri.",
+  ctaHome: "Torna alla home",
+};

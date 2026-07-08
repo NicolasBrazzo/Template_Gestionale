@@ -182,10 +182,10 @@ export const HomePage = () => {
   );
 
   return (
-    // La landing gira nel contesto "dark" degli stessi token shadcn del
-    // gestionale (nessuna palette a parte): così il Prism WebGL, che rende
-    // al meglio su fondo scuro, resta coerente e il testo leggibile.
-    <div ref={scope} className="dark relative min-h-screen overflow-hidden bg-background text-foreground">
+    // La landing gira in light mode con gli stessi token shadcn del
+    // gestionale (nessuna palette a parte): il Prism WebGL mantiene i suoi
+    // colori e lo scrim garantisce il contrasto del testo sul fondo chiaro.
+    <div ref={scope} className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Sfondo animato: prisma WebGL (React Bits) confinato alla prima
           schermata; non cattura il puntatore così CTA e finestra restano
           interattive. Sospeso quando esce dal viewport per risparmiare GPU. */}
