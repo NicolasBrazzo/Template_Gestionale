@@ -3,6 +3,7 @@ import { HomePage } from "./pages/HomePage.jsx";
 import { Login } from "./pages/Login.jsx";
 import { Register } from "./pages/Register.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { ThemeProvider, useTheme } from "./context/ThemeContext.jsx";
 import { PrivateRoute } from "./components/PrivateRoute.jsx";
 import { Dashboard } from "./pages/Dashboard.jsx";
 import { AppLayout } from "./layouts/AppLayout.jsx";
@@ -13,10 +14,16 @@ import { NotFound } from "./pages/NotFound.jsx";
 
 const queryClient = new QueryClient();
 
+// Toast allineati al tema corrente (consuma useTheme, quindi vive dentro ThemeProvider).
+function ThemedToastContainer() {
+  const { isDark } = useTheme();
+  return <ToastContainer theme={isDark ? "dark" : "light"} />;
+}
+
 function App() {
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
         <AuthProvider>
           <BrowserRouter>
             <Routes>
@@ -33,9 +40,9 @@ function App() {
             </Routes>
           </BrowserRouter>
         </AuthProvider>
-      </QueryClientProvider>
-      <ToastContainer />
-    </>
+        <ThemedToastContainer />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

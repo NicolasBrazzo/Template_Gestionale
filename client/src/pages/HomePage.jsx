@@ -14,6 +14,7 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "../components/ThemeToggle";
 import Prism from "../components/Prism";
 import { useAuth } from "../context/AuthContext";
 import { APP_NAME, APP_LOGO, HOME } from "../constants/app";
@@ -182,9 +183,10 @@ export const HomePage = () => {
   );
 
   return (
-    // La landing gira in light mode con gli stessi token shadcn del
-    // gestionale (nessuna palette a parte): il Prism WebGL mantiene i suoi
-    // colori e lo scrim garantisce il contrasto del testo sul fondo chiaro.
+    // La landing usa gli stessi token shadcn del gestionale (nessuna palette
+    // a parte) ed è theme-responsive: con il tema scuro --background diventa
+    // scuro e lo scrim scurisce l'hero. Il Prism WebGL mantiene i suoi colori
+    // e lo scrim garantisce il contrasto del testo in entrambi i temi.
     <div ref={scope} className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Sfondo animato: prisma WebGL (React Bits) confinato alla prima
           schermata; non cattura il puntatore così CTA e finestra restano
@@ -222,12 +224,15 @@ export const HomePage = () => {
           </span>
           <span className="text-sm font-semibold tracking-tight">{APP_NAME}</span>
         </div>
-        <Button asChild variant="ghost" size="sm">
-          <Link to={authTo}>
-            {user ? "Dashboard" : HOME.ctaPrimary}
-            <ArrowRight aria-hidden="true" />
-          </Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Button asChild variant="ghost" size="sm">
+            <Link to={authTo}>
+              {user ? "Dashboard" : HOME.ctaPrimary}
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          </Button>
+        </div>
       </header>
 
       <main className="relative z-10 mx-auto w-full max-w-5xl px-6 pt-16 text-center md:pt-24">

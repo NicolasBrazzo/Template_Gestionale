@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LayoutDashboard, UserPlus, LogOut } from "lucide-react";
 import { APP_NAME, APP_LOGO } from "../constants/app";
+import { ThemeToggle } from "./ThemeToggle";
 
 // Voci di menu: aggiungere qui le pagine delle risorse del progetto.
 const MENU_ITEMS = [
@@ -69,6 +70,12 @@ export const Sidebar = () => {
       </nav>
 
       <div className="mt-auto border-t border-sidebar-border py-4">
+        {/* Toggle tema: Switch con etichetta da aperta, sola icona da collassata */}
+        <div className="px-4 py-3">
+          {isOpen ?
+            <ThemeToggle showLabel className="w-full justify-between text-sidebar-foreground" />
+          : <ThemeToggle showSwitch={false} className="hover:text-sidebar-accent-foreground" />}
+        </div>
         <button
           type="button"
           onClick={() => logout()}

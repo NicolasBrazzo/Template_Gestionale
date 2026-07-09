@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { APP_NAME, APP_LOGO, ROLE_LABELS } from "../constants/app";
 
 export const Register = () => {
@@ -78,6 +79,7 @@ export const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
+      <ThemeToggle className="fixed right-4 top-4 z-50" />
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
