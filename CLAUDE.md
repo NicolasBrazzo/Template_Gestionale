@@ -24,6 +24,16 @@ Deployment (Railway for the server, Vercel for the client) is documented step-by
 - Whenever you need to consult the API to debug an issue or to add/modify routes, always read [`server/ENDPOINTS.md`](server/ENDPOINTS.md) first — it is the reference for every backend route.
 - If you add, remove, or modify an endpoint, you MUST update `server/ENDPOINTS.md` **and** the Postman collection (`server/postman_collection.json`) to reflect the change in the same edit.
 
+**Frontend tables:**
+- To create or modify any table (frontend), always look at and use [`client/src/components/DataTable.jsx`](client/src/components/DataTable.jsx) — every table in the app goes through this component. Do not hand-roll `<table>` markup.
+- Column header names must be defined in [`client/src/constants/columnLabels.js`](client/src/constants/columnLabels.js) (one label map per resource), not inlined in the page.
+
+**Frontend data fetching:**
+- For any backend call from a page, use (where possible) [`client/src/hooks/useFetch.js`](client/src/hooks/useFetch.js) for reads and [`client/src/hooks/useMutation.js`](client/src/hooks/useMutation.js) for writes. If neither hook fits the case, stop and ask the user how to proceed.
+
+**Components:**
+- Every time you think you need to create a component, first check whether it already exists (`client/src/components/` and `client/src/components/ui/`). If it does not, ask the user for permission before creating it.
+
 ## Commands
 
 Run these from inside `client/` or `server/` respectively.
