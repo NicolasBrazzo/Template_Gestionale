@@ -43,7 +43,7 @@ const updateUserById = async (id, userData) => {
     .update(userData)
     .eq("id", id)
     .select()
-    .single();
+    .maybeSingle();   // null se l'id non esiste: il controller risponde 404
 
   if (error) {
     throw new Error("DATABASE_EDIT_USER_ERROR");
@@ -59,7 +59,7 @@ const deleteUserById = async (id) => {
     .delete()
     .eq("id", id)
     .select()
-    .single();
+    .maybeSingle();   // null se l'id non esiste: il controller risponde 404
 
   if (error) {
     throw new Error("DATABASE_DELETE_USER_ERROR");

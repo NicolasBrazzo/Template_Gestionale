@@ -5,8 +5,8 @@ partendo dal template. I passi sono sempre gli stessi; l'esempio vivo del
 pattern completo è la risorsa **Utenti** (`server/controllers/users.controller.js`
 + `client/src/pages/Users.jsx`).
 
-> Se la risorsa ha relazioni (FK), filtri, un owner, stati o statistiche,
-> le ricette pronte sono in [`PATTERNS.md`](PATTERNS.md).
+> Se la risorsa espone un elenco con filtri, paginazione o ordinamento,
+> segui le convenzioni in [`client/src/FILTERS_BE.md`](client/src/FILTERS_BE.md).
 
 ## 1. Database (Supabase)
 

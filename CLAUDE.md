@@ -18,7 +18,7 @@ Deployment (Railway for the server, Vercel for the client) is documented step-by
 
 **New resources:**
 - To add a new resource (table + endpoints + page), follow the step-by-step recipe in [`ADDING_A_RESOURCE.md`](ADDING_A_RESOURCE.md). The live reference implementation of the full pattern is the **Users** resource (`server/controllers/users.controller.js` + `client/src/pages/Users.jsx`).
-- For domain patterns beyond plain CRUD — FK joins in lists, query-string filters, ownership checks, status transitions, statistics/aggregations — use the copy-ready recipes in [`PATTERNS.md`](PATTERNS.md).
+- For list endpoints with query-string filters, pagination, or sorting, follow the conventions and reference implementation in [`client/src/FILTERS_BE.md`](client/src/FILTERS_BE.md).
 
 **Endpoints:**
 - Whenever you need to consult the API to debug an issue or to add/modify routes, always read [`server/ENDPOINTS.md`](server/ENDPOINTS.md) first — it is the reference for every backend route.
@@ -99,7 +99,7 @@ React 19 + Vite + React Router 7 + Tailwind CSS v4 + shadcn/ui (Radix) component
 - `src/utils/validators/` — client-side validators mirroring the server's; re-exported via `validators/index.js`.
 - `src/constants/columnLabels.js` — Italian column-header label maps for the tables.
 - `src/constants/app.js` — app name/logo branding, `ROLE_LABELS` (display names for the isAdmin true/false roles, used by Register/Users/Dashboard), and `HOME` (all copy for the public hero: title/subtitle/CTAs/demo stats & ledger rows). Customize here (plus `<title>` in `index.html`) when starting a new project from the template — the landing uses the shared shadcn tokens, plus the `--font-display`/`--font-data` fonts in `index.css`.
-- `src/components/ui/` — shadcn/ui primitives (configured via `components.json`); other reusable components (`DataTable`, `FilterBar`, `Modal`, `Loader`, `Side`, `PrivateRoute`) live in `src/components/`. `FilterBar` is the config-driven filter strip meant to pair with `useFetch` deps (usage in `PATTERNS.md`).
+- `src/components/ui/` — shadcn/ui primitives (configured via `components.json`); other reusable components (`DataTable`, `FilterBar`, `Modal`, `Loader`, `Side`, `PrivateRoute`) live in `src/components/`. `FilterBar` is the config-driven filter strip meant to pair with `useFetch` deps (backend contract in `client/src/FILTERS_BE.md`).
 
 **Page pattern** (see `src/pages/Users.jsx` as the reference): a page composes `useFetch` for the list + `useMutation` for create/update/delete, an inline `*Form` subcomponent driven by local `formState`, a `Modal` for create/edit and another for view-details, client-side validation inside the mutation fn (throw to surface `saveError`), and `refetch()` in `onSuccess`.
 

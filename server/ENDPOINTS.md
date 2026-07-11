@@ -54,8 +54,8 @@ Tutte le rotte richiedono autenticazione **e privilegi di amministratore** (`isA
 - `GET /users` — Elenco di tutti gli utenti.
 - `GET /users/:id` — Singolo utente per ID.
 - `POST /users` — Crea un nuovo utente.
-- `PUT /users/:id` — Aggiorna un utente (`password` opzionale; un admin non può rimuovere i propri privilegi).
-- `DELETE /users/:id` — Elimina un utente.
+- `PUT /users/:id` — Aggiorna un utente (`password` opzionale; un admin non può rimuovere i propri privilegi). `404` se l'utente non esiste, `409` se l'email è già usata da un altro utente.
+- `DELETE /users/:id` — Elimina un utente. `404` se l'utente non esiste.
 
 ---
 

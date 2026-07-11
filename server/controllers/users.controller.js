@@ -133,6 +133,23 @@ router.put("/:id", protect, isAdmin, async (req, res) => {
       });
     }
 
+    // Validazione email
+    if (!validateEmail(email)) {
+      return res.status(400).json({
+        ok: false,
+        error: "Formato email non valido: deve essere nel formato testo@dominio.tld",
+      });
+    }
+
+    // Email già usata da un altro utente
+    const existingUser = await findUserByEmail(email);
+    if (existingUser && String(existingUser.id) !== id) {
+      return res.status(409).json({
+        ok: false,
+        error: "Email già in uso",
+      });
+    }
+
     let updateData = {
       email,
       isAdmin,
@@ -154,6 +171,9 @@ router.put("/:id", protect, isAdmin, async (req, res) => {
     }
 
     const user = await updateUserById(id, updateData);
+    if (!user) {
+      return res.status(404).json({ ok: false, error: "Utente non trovato" });
+    }
     return res.status(200).json({ ok: true, user });
   } catch (err) {
     console.error("UPDATE USER BY ID ERROR:", err);
@@ -167,6 +187,9 @@ router.delete("/:id", protect, isAdmin, async (req, res) => {
     const { id } = req.params;
 
     const user = await deleteUserById(id);
+    if (!user) {
+      return res.status(404).json({ ok: false, error: "Utente non trovato" });
+    }
     return res.status(200).json({ ok: true, user });
   } catch (err) {
     console.error("DELETE USER BY ID ERROR:", err);
